@@ -1,0 +1,4 @@
+#Ignora todo
+/DBAPrac2/*
+#Menos la carpeta de fuentes
+!/DBAPrac2/src
