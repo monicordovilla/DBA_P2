@@ -8,16 +8,37 @@ package dbaprac2;
 import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
 import DBA.SuperAgent;
+import java.util.Scanner;
 
 /**
  *
  * @author Kieran
  */
 public class AgenteSimple extends SuperAgent{
+    
+    //  Añadir string para guardar el mensaje anteriormente recibido aqui
+    /*
+        Añadir estructuras de datos para info de sensores aqui
+    */
+    
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
     }
     
+    /**
+    *
+    * @author Kieran
+    */
+    void seleccionarMapa(){
+        System.out.println("Inserte el nombre del mapa a probar:");
+        Scanner s = new Scanner(System.in);
+        mapa_seleccionado = s.nextLine();
+    }
+    
+    /**
+    *
+    * @author Kieran
+    */
     private void comunicar(String nombre, String mensaje) {
         ACLMessage outbox = new ACLMessage();
         outbox.setSender(this.getAid());
@@ -26,6 +47,10 @@ public class AgenteSimple extends SuperAgent{
         this.send(outbox);
     }
     
+    /**
+    *
+    * @author Kieran
+    */
     private String escuchar() {
         ACLMessage inbox;
         try{
@@ -45,9 +70,22 @@ public class AgenteSimple extends SuperAgent{
         System.out.println("\nInicializado");
     }
     
+    /**
+    *
+    * @author Kieran
+    */
     @Override
     public void execute() {
+        seleccionarMapa();
+        //codificar el mensaje inicial JSON aqui
         comunicar("nombre", "mensaje");
+        while(true/*si el mensaje anterior es valido*/)
+        {
+            //comprobar si se esta en la meta aqui
+            //funcion de utilidad/comprobar mejor casilla aqui
+            //codificar respuesta JSON aqui
+            comunicar("nombre", "mensaje");
+        }
     }
     
     @Override
