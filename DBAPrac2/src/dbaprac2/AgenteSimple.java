@@ -9,20 +9,41 @@ import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
 import DBA.SuperAgent;
 import java.util.Scanner;
-
+import com.eclipsesource.json.JsonObject;
+        
 /**
  *
- * @author Kieran
+ * @author Kieran, Monica
  */
 public class AgenteSimple extends SuperAgent{
     
     //  Añadir string para guardar el mensaje anteriormente recibido aqui
-    /*
-        Añadir estructuras de datos para info de sensores aqui
-    */
+   
+    private class GPS {
+        public int x;
+        public int y;
+        public int z;
+        
+        GPS() {
+            x = -1; y = -1; z = -1;
+        }
+    }
+    private class Gonio {
+        public float angulo;
+        public float distancia;
+    }
+    
+    static int tamanio_radar = 11;
+    GPS gps;
+    Gonio gonio;
+    float fuel;
+    int[][] radar;
+    boolean goal;
+    boolean crash;
     
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
+        radar = new int[tamanio_radar][tamanio_radar];
     }
     
     /**
@@ -35,6 +56,24 @@ public class AgenteSimple extends SuperAgent{
         String mapa_seleccionado = s.nextLine();
         return mapa_seleccionado;
     }
+    
+    /**
+    *
+    * @author Kieran, Monica
+    */
+    private String JSONEncode(){
+        JsonObject a = new JsonObject();
+        return a.toString();
+    }
+    
+    /**
+    *
+    * @author Monica
+    */
+    private void JSONDecode(String mensaje){
+        JsonObject a = new JsonObject();
+    }
+    
     
     /**
     *
