@@ -29,10 +29,11 @@ public class AgenteSimple extends SuperAgent{
     *
     * @author Kieran
     */
-    void seleccionarMapa(){
+    private String seleccionarMapa(){
         System.out.println("Inserte el nombre del mapa a probar:");
         Scanner s = new Scanner(System.in);
-        mapa_seleccionado = s.nextLine();
+        String mapa_seleccionado = s.nextLine();
+        return mapa_seleccionado;
     }
     
     /**
@@ -76,7 +77,7 @@ public class AgenteSimple extends SuperAgent{
     */
     @Override
     public void execute() {
-        seleccionarMapa();
+        String mapa = seleccionarMapa();
         //codificar el mensaje inicial JSON aqui
         comunicar("nombre", "mensaje");
         while(true/*si el mensaje anterior es valido*/)
