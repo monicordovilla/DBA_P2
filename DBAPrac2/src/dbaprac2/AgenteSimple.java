@@ -88,73 +88,121 @@ public class AgenteSimple extends SuperAgent{
     private Accion comprobarAccion(){
         switch(siguienteAccion()) {
           case moveNW:
-            if(radar[4][4] == gps.z)
+            if(radar[4][4]==0);
+                //Error
+            else if(fuel<=10)
+                if((fuel<=10&&gps.z-radar[0][0]>0)||(fuel<=5&&gps.z-radar[4][4]>0)||(fuel==0&&radar[5][5]==gps.z))
+                    return refuel;
+            else if(radar[4][4] == gps.z)
               return siguienteAccion();
-            else if((radar[4][4] < gps.z) && (gps.z-5 >= 0))
-              return moveDW;
+            else if(gonio.distancia>fuel)
+                if((gps.z-radar[5][5]==fuel) && (radar[4][4]<=radar[5][5]) && (radar[3][3]<=radar[5][5]) && (radar[2][2]<=radar[5][5]) && (radar[1][1]<=radar[5][5]) && (radar[0][0]<=radar[5][5]) && (gps.z-5 >= 0))
+                    return moveDW;
             else if(radar[4][4] > gps.z && (gps.z+5 <= 0))
               return moveUP;
           break;
 
           case moveN:
-            if(radar[4][5] == gps.z)
+            if(radar[4][5]==0);
+                //Error
+            else if(fuel<=10)
+                if((fuel<=10&&gps.z-radar[0][5]>0)||(fuel<=5&&gps.z-radar[4][5]>0)||(fuel==0&&radar[5][5]==gps.z))
+                    return refuel;
+            else if(radar[4][5] == gps.z)
               return siguienteAccion();
-            else if((radar[4][5] < gps.z) && (gps.z-5 >= 0))
-              return moveDW;
+            else if(gonio.distancia>fuel)
+                if((gps.z-radar[5][5]==fuel) && (radar[5][4]<=radar[5][5]) && (radar[5][3]<=radar[5][5]) && (radar[5][2]<=radar[5][5]) && (radar[5][1]<=radar[5][5]) && (radar[5][0]<=radar[5][5]) && (gps.z-5 >= 0))
+                    return moveDW;
             else if(radar[4][5] > gps.z && (gps.z+5 <= 0))
               return moveUP;
           break;
 
           case moveNE:
-            if(radar[4][6] == gps.z)
+            if(radar[4][6]==0);
+                //Error
+            else if(fuel<=10)
+                if((fuel<=10&&gps.z-radar[0][10]>0)||(fuel<=5&&gps.z-radar[4][6]>0)||(fuel==0&&radar[5][5]==gps.z))
+                    return refuel;
+            else if(radar[4][6] == gps.z)
               return siguienteAccion();
-            else if((radar[4][6] < gps.z) && (gps.z-5 >= 0))
-              return moveDW;
+            else if(gonio.distancia>fuel)
+                if((gps.z-radar[5][5]==fuel) && (radar[6][4]<=radar[5][5]) && (radar[7][3]<=radar[5][5]) && (radar[8][2]<=radar[5][5]) && (radar[9][1]<=radar[5][5]) && (radar[10][0]<=radar[5][5]) && (gps.z-5 >= 0))
+                    return moveDW;
             else if(radar[4][6] > gps.z && (gps.z+5 <= 0))
               return moveUP;
           break;
 
           case moveW:
-            if(radar[5][4] == gps.z)
+            if(radar[5][4]==0);
+                //Error
+            else if(fuel<=10)
+                if((fuel<=10&&gps.z-radar[5][0]>0)||(fuel<=5&&gps.z-radar[5][4]>0)||(fuel==0&&radar[5][5]==gps.z))
+                    return refuel;
+            else if(radar[5][4] == gps.z)
               return siguienteAccion();
-            else if((radar[5][4] < gps.z) && (gps.z-5 >= 0))
-              return moveDW;
+            else if(gonio.distancia>fuel)
+                if((gps.z-radar[5][5]==fuel) && (radar[5][4]<=radar[5][5]) && (radar[5][3]<=radar[5][5]) && (radar[5][2]<=radar[5][5]) && (radar[5][1]<=radar[5][5]) && (radar[5][0]<=radar[5][5]) && (gps.z-5 >= 0))
+                    return moveDW;
             else if(radar[5][4] > gps.z && (gps.z+5 <= 0))
               return moveUP;
           break;
 
           case moveE:
-            if(radar[5][6] == gps.z)
+            if(radar[5][6]==0);
+                //Error
+            else if(fuel<=10)
+                if((fuel<=10&&gps.z-radar[5][10]>0)||(fuel<=5&&gps.z-radar[5][6]>0)||(fuel==0&&radar[5][5]==gps.z))
+                    return refuel;
+            else if(radar[5][6] == gps.z)
               return siguienteAccion();
-            else if((radar[5][6] < gps.z) && (gps.z-5 >= 0))
-              return moveDW;
+            else if(gonio.distancia>fuel)
+                if((gps.z-radar[5][5]==fuel) && (radar[6][5]<=radar[5][5]) && (radar[7][5]<=radar[5][5]) && (radar[8][5]<=radar[5][5]) && (radar[9][5]<=radar[5][5]) && (radar[10][5]<=radar[5][5]) && (gps.z-5 >= 0))
+                    return moveDW;
             else if(radar[5][6] > gps.z && (gps.z+5 <= 0))
               return moveUP;
           break;
 
           case moveSW:
-            if(radar[6][4] == gps)
+            if(radar[6][4]==0);
+                //Error
+            else if(fuel<=10)
+                if((fuel<=10&&gps.z-radar[10][0]>0)||(fuel<=5&&gps.z-radar[6][4]>0)||(fuel==0&&radar[5][5]==gps.z))
+                    return refuel;
+            else if(radar[6][4] == gps.z)
               return siguienteAccion();
-            else if((radar[6][4] < gps.z) && (gps.z-5 >= 0))
-              return moveDW;
+            else if(gonio.distancia>fuel)
+                if((gps.z-radar[5][5]==fuel) && (radar[4][6]<=radar[5][5]) && (radar[3][7]<=radar[5][5]) && (radar[2][8]<=radar[5][5]) && (radar[1][9]<=radar[5][5]) && (radar[0][10]<=radar[5][5]) && (gps.z-5 >= 0))
+                    return moveDW;
             else if(radar[6][4] > gps.z && (gps.z+5 <= 0))
               return moveUP;
           break;
 
           case moveS:
-            if(radar[6][5] == gps.z)
+            if(radar[6][5]==0);
+                //Error
+            else if(fuel<=10)
+                if((fuel<=10&&gps.z-radar[5][10]>0)||(fuel<=5&&gps.z-radar[5][6]>0)||(fuel==0&&radar[5][5]==gps.z))
+                    return refuel;
+            else if(radar[6][5] == gps.z)
               return siguienteAccion();
-            else if((radar[6][5] < gps.z) && (gps.z-5 >= 0))
-              return moveDW;
+            else if(gonio.distancia>fuel)
+                if((gps.z-radar[5][5]==fuel) && (radar[5][6]<=radar[5][5]) && (radar[5][7]<=radar[5][5]) && (radar[5][8]<=radar[5][5]) && (radar[5][9]<=radar[5][5]) && (radar[5][10]<=radar[5][5]) && (gps.z-5 >= 0))
+                    return moveDW;
             else if(radar[6][5] > gps.z && (gps.z+5 <= 0))
               return moveUP;
           break;
 
           case moveSE:
-            if(radar[6][6] == gps.z)
+            if(radar[6][6]==0);
+                //Error
+            else if(fuel<=10)
+                if((fuel<=10&&gps.z-radar[10][10]>0)||(fuel<=5&&gps.z-radar[6][6]>0)||(fuel==0&&radar[5][5]==gps.z))
+                    return refuel;
+            else if(radar[6][6] == gps.z)
               return siguienteAccion();
-            else if((radar[6][6] < gps.z) && (gps.z-5 >= 0))
-              return moveDW;
+            else if(gonio.distancia>fuel)
+                if((gps.z-radar[5][5]==fuel) && (radar[6][6]<=radar[5][5]) && (radar[7][7]<=radar[5][5]) && (radar[8][8]<=radar[5][5]) && (radar[9][9]<=radar[5][5]) && (radar[10][10]<=radar[5][5]) && (gps.z-5 >= 0))
+                    return moveDW;
             else if(radar[6][6] > gps.z && (gps.z+5 <= 0))
               return moveUP;
           break;
