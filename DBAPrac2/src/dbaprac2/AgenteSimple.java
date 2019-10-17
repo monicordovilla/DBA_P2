@@ -89,7 +89,7 @@ public class AgenteSimple extends SuperAgent{
         switch(siguienteAccion()) {
           case moveNW:
             if(radar[4][4]==0);
-                //Error
+                //Mensaje de error
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[0][0]>0)||(fuel<=5&&gps.z-radar[4][4]>0)||(fuel==0&&radar[5][5]==gps.z))
                     return refuel;
