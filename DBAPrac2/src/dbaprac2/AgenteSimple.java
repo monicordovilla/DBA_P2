@@ -11,20 +11,20 @@ import DBA.SuperAgent;
 import java.util.Scanner;
 import com.eclipsesource.json.JsonObject;
 import static dbaprac2.Accion.*;
-        
+
 /**
  *
  * @author Kieran, Monica
  */
 public class AgenteSimple extends SuperAgent{
-    
+
     //  Añadir string para guardar el mensaje anteriormente recibido aqui
-   
+
     private class GPS {
         public int x;
         public int y;
         public int z;
-        
+
         GPS() {
             x = -1; y = -1; z = -1;
         }
@@ -33,7 +33,7 @@ public class AgenteSimple extends SuperAgent{
         public float angulo;
         public float distancia;
     }
-    
+
     static int tamanio_radar = 11;
     GPS gps;
     Gonio gonio;
@@ -41,12 +41,12 @@ public class AgenteSimple extends SuperAgent{
     int[][] radar;
     boolean goal;
     boolean crash;
-    
+
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
         radar = new int[tamanio_radar][tamanio_radar];
     }
-    
+
     /**
     *
     * @author Kieran
@@ -57,7 +57,7 @@ public class AgenteSimple extends SuperAgent{
         String mapa_seleccionado = s.nextLine();
         return mapa_seleccionado;
     }
-    
+
     /**
     *
     * @author Celia
@@ -78,8 +78,21 @@ public class AgenteSimple extends SuperAgent{
         if(gonio.angulo>=292.5 && gonio.angulo<337.5)
             return moveNW;
         return moveN;
-        
-    }    
+
+    }
+
+    /**
+    *
+    * @author Ana
+    */
+    private Accion comprobarAltura(){
+        if(gps.z <= radar)
+          return moveUP
+        else
+          return moveDW
+
+
+    }
 
         /**
     *
@@ -87,8 +100,8 @@ public class AgenteSimple extends SuperAgent{
     */
     private boolean comprobarMeta(){
         return gonio.distancia==0;
-    }  
-    
+    }
+
     /**
     *
     * @author Kieran, Monica
@@ -97,7 +110,7 @@ public class AgenteSimple extends SuperAgent{
         JsonObject a = new JsonObject();
         return a.toString();
     }
-    
+
     /**
     *
     * @author Monica
@@ -105,8 +118,8 @@ public class AgenteSimple extends SuperAgent{
     private void JSONDecode(String mensaje){
         JsonObject a = new JsonObject();
     }
-    
-    
+
+
     /**
     *
     * @author Kieran
@@ -118,7 +131,7 @@ public class AgenteSimple extends SuperAgent{
         outbox.setContent(mensaje);
         this.send(outbox);
     }
-    
+
     /**
     *
     * @author Kieran
@@ -136,15 +149,15 @@ public class AgenteSimple extends SuperAgent{
         System.out.println("Mensaje recibido:\n" + mensaje);
         return mensaje;
     }
-    
+
     @Override
     public void init() { //Opcional
         System.out.println("\nInicializado");
     }
-    
+
     /**
     *
-    * @author Kieran
+    * @author Kieran, Ana
     */
     @Override
     public void execute() {
@@ -158,15 +171,18 @@ public class AgenteSimple extends SuperAgent{
             //funcion de utilidad/comprobar mejor casilla aqui
             //codificar respuesta JSON aqui
             comunicar("nombre", "mensaje");
-           
+
             if(!comprobarMeta()){
-                 accion=siguienteAccion();
+                if(comprobarAltura())
+                  accion = cambioAltura();
+                else
+                  accion=siguienteAccion();
             }
-                
+
         }
 
     }
-    
+
     @Override
     public void finalize() { //Opcional
         System.out.println("\nFinalizando");
