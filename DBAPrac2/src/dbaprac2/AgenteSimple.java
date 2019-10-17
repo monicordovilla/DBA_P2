@@ -14,7 +14,7 @@ import static dbaprac2.Accion.*;
 
 /**
  *
- * @author Kieran, Monica, Ana
+ * @author Kieran, Monica
  */
 public class AgenteSimple extends SuperAgent{
 
@@ -39,7 +39,6 @@ public class AgenteSimple extends SuperAgent{
     Gonio gonio;
     float fuel;
     int[][] radar;
-    int[][] elevation;
     boolean goal;
     boolean crash;
 
@@ -87,15 +86,83 @@ public class AgenteSimple extends SuperAgent{
     * @author Ana
     */
     private Accion comprobarAccion(){
-        if(elevation[5][5] == 0)
-          return siguienteAccion();
-        else if(elevation[5][5] > 0)
-          return moveDW;
-        else
-          return moveUP;
+        switch(siguienteAccion()) {
+          case moveNW:
+            if(radar[4][4] == gps.z)
+              return siguienteAccion();
+            else if((radar[4][4] < gps.z) && (gps.z-5 >= 0))
+              return moveDW;
+            else if(radar[4][4] > gps.z && (gps.z+5 <= 0))
+              return moveUP;
+          break;
+
+          case moveN:
+            if(radar[4][5] == gps.z)
+              return siguienteAccion();
+            else if((radar[4][5] < gps.z) && (gps.z-5 >= 0))
+              return moveDW;
+            else if(radar[4][5] > gps.z && (gps.z+5 <= 0))
+              return moveUP;
+          break;
+
+          case moveNE:
+            if(radar[4][6] == gps.z)
+              return siguienteAccion();
+            else if((radar[4][6] < gps.z) && (gps.z-5 >= 0))
+              return moveDW;
+            else if(radar[4][6] > gps.z && (gps.z+5 <= 0))
+              return moveUP;
+          break;
+
+          case moveW:
+            if(radar[5][4] == gps.z)
+              return siguienteAccion();
+            else if((radar[5][4] < gps.z) && (gps.z-5 >= 0))
+              return moveDW;
+            else if(radar[5][4] > gps.z && (gps.z+5 <= 0))
+              return moveUP;
+          break;
+
+          case moveE:
+            if(radar[5][6] == gps.z)
+              return siguienteAccion();
+            else if((radar[5][6] < gps.z) && (gps.z-5 >= 0))
+              return moveDW;
+            else if(radar[5][6] > gps.z && (gps.z+5 <= 0))
+              return moveUP;
+          break;
+
+          case moveSW:
+            if(radar[6][4] == gps)
+              return siguienteAccion();
+            else if((radar[6][4] < gps.z) && (gps.z-5 >= 0))
+              return moveDW;
+            else if(radar[6][4] > gps.z && (gps.z+5 <= 0))
+              return moveUP;
+          break;
+
+          case moveS:
+            if(radar[6][5] == gps.z)
+              return siguienteAccion();
+            else if((radar[6][5] < gps.z) && (gps.z-5 >= 0))
+              return moveDW;
+            else if(radar[6][5] > gps.z && (gps.z+5 <= 0))
+              return moveUP;
+          break;
+
+          case moveSE:
+            if(radar[6][6] == gps.z)
+              return siguienteAccion();
+            else if((radar[6][6] < gps.z) && (gps.z-5 >= 0))
+              return moveDW;
+            else if(radar[6][6] > gps.z && (gps.z+5 <= 0))
+              return moveUP;
+          break;
+        }
+
     }
 
-        /**
+    /**
     *
     * @author Celia
     */
