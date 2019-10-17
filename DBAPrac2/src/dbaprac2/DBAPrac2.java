@@ -21,9 +21,9 @@ public class DBAPrac2 {
         AgentsConnection.connect(
                 "isg2.ugr.es",  //Host: localhost si se quiere probar en nuestra propia maquina
                 6000,           //Puerto: por defecto 5672
-                "test",         //???: Cambia en la p2
-                /*CAMBIAR LUEGO*/"guest",        //Usuario
-                /*CAMBIAR LUEGO*/"guest",       //Contraseña
+                "Practica2",   
+                "Ibbotson",        //Usuario
+                "oLARuosE",       //Contraseña
                 false           //SSL
         );
         

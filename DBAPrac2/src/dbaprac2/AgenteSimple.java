@@ -10,6 +10,7 @@ import es.upv.dsic.gti_ia.core.AgentID;
 import DBA.SuperAgent;
 import java.util.Scanner;
 import com.eclipsesource.json.JsonObject;
+import static dbaprac2.Accion.*;
         
 /**
  *
@@ -56,6 +57,37 @@ public class AgenteSimple extends SuperAgent{
         String mapa_seleccionado = s.nextLine();
         return mapa_seleccionado;
     }
+    
+    /**
+    *
+    * @author Celia
+    */
+    private Accion siguienteAccion(){
+        if(gonio.angulo>=22.5 && gonio.angulo<67.5)
+            return moveNE;
+        if(gonio.angulo>=67.5 && gonio.angulo<112.5)
+            return moveE;
+        if(gonio.angulo>=112.5 && gonio.angulo<157.5)
+            return moveSE;
+        if(gonio.angulo>=157.5 && gonio.angulo<202.5)
+            return moveS;
+        if(gonio.angulo>=202.5 && gonio.angulo<247.5)
+            return moveSW;
+        if(gonio.angulo>=247.5 && gonio.angulo<292.5)
+            return moveW;
+        if(gonio.angulo>=292.5 && gonio.angulo<337.5)
+            return moveNW;
+        return moveN;
+        
+    }    
+
+        /**
+    *
+    * @author Celia
+    */
+    private boolean comprobarMeta(){
+        return gonio.distancia==0;
+    }  
     
     /**
     *
@@ -117,6 +149,7 @@ public class AgenteSimple extends SuperAgent{
     @Override
     public void execute() {
         String mapa = seleccionarMapa();
+        Accion accion;
         //codificar el mensaje inicial JSON aqui
         comunicar("nombre", "mensaje");
         while(true/*si el mensaje anterior es valido*/)
@@ -125,7 +158,13 @@ public class AgenteSimple extends SuperAgent{
             //funcion de utilidad/comprobar mejor casilla aqui
             //codificar respuesta JSON aqui
             comunicar("nombre", "mensaje");
+           
+            if(!comprobarMeta()){
+                 accion=siguienteAccion();
+            }
+                
         }
+
     }
     
     @Override
