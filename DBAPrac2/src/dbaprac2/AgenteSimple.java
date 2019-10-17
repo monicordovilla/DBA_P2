@@ -14,7 +14,7 @@ import static dbaprac2.Accion.*;
 
 /**
  *
- * @author Kieran, Monica
+ * @author Kieran, Monica, Ana
  */
 public class AgenteSimple extends SuperAgent{
 
@@ -39,6 +39,7 @@ public class AgenteSimple extends SuperAgent{
     Gonio gonio;
     float fuel;
     int[][] radar;
+    int[][] elevation;
     boolean goal;
     boolean crash;
 
@@ -85,13 +86,13 @@ public class AgenteSimple extends SuperAgent{
     *
     * @author Ana
     */
-    private Accion comprobarAltura(){
-        if(gps.z <= radar)
-          return moveUP
+    private Accion comprobarAccion(){
+        if(elevation[5][5] == 0)
+          return siguienteAccion();
+        else if(elevation[5][5] > 0)
+          return moveDW;
         else
-          return moveDW
-
-
+          return moveUP;
     }
 
         /**
@@ -173,10 +174,8 @@ public class AgenteSimple extends SuperAgent{
             comunicar("nombre", "mensaje");
 
             if(!comprobarMeta()){
-                if(comprobarAltura())
-                  accion = cambioAltura();
-                else
-                  accion=siguienteAccion();
+                accion = comprobarAccion();
+
             }
 
         }
