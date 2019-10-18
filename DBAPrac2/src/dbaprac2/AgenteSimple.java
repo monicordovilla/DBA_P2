@@ -84,7 +84,7 @@ public class AgenteSimple extends SuperAgent{
             return moveNW;
         if(gonio.angulo>=337.5 && gonio.angulo<22.5)
             return moveN;
-        return idle;
+        return logout;
 
     }
 
@@ -109,13 +109,13 @@ public class AgenteSimple extends SuperAgent{
       }
 
       if(radar[x][y]==0)
-          return idle;
+          return logout;
       else if(radar[x][y] <= gps.z)
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= 255))
         return moveUP;
       
-      return idle;
+      return logout;
     }
 
     /**
@@ -270,6 +270,9 @@ public class AgenteSimple extends SuperAgent{
             
             if(!goal)
                 command = comprobarAccion();
+            else
+                command = logout;
+                
           
             
             System.out.println(command.toString());
@@ -279,6 +282,8 @@ public class AgenteSimple extends SuperAgent{
             respuesta = escuchar();
             a = Json.parse(respuesta).asObject();
         }
+        
+        respuesta = escuchar();
 
     }
 
