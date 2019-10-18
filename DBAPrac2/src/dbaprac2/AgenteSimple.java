@@ -44,6 +44,8 @@ public class AgenteSimple extends SuperAgent{
     int[][] radar;
     boolean goal;
     boolean crash;
+    Accion command; //Siguiente accion que tiene que hacer el agente
+    String clave;   //Clave que hay que enviar con cada comando que se envía
 
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
@@ -268,26 +270,8 @@ public class AgenteSimple extends SuperAgent{
         JsonObject a = new JsonObject();
         
         //Añadimos pares <clave, valor>        
-        JsonObject gps_json = new JsonObject();
-        gps_json.add("x", gps.x);
-        gps_json.add("y", gps.y);
-        gps_json.add("z", gps.z);
-        a.add("gps", gps_json);
-        
-        a.add("fuel", fuel);
-        
-        JsonObject gonio_json = new JsonObject();
-        gonio_json.add("distance", gonio.distancia);
-        gonio_json.add("angle", gonio.angulo);
-        a.add("gonio", gonio_json);
-        
-        JsonArray radar_json = new JsonArray();
-        for(int i=0; i<radar.length; i++){
-            for(int j=0; j<radar.length; j++){
-                radar_json.add(radar[i][j]);
-            }
-        }
-        a.add("radar", radar_json);
+        a.add("command", command.toString());
+        a.add("key", clave);
         
         //Serializar el objeto en un String
         String resultado = a.toString();
@@ -365,6 +349,32 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
+    * @author Monica
+    */
+    private String MensajeInicialJSON(String mapa){
+        JsonObject a = new JsonObject();
+        //Iniciamos y mandamos el mapa que queremos
+        a.add("command", "login");
+        a.add("map", mapa);
+        
+        //Solicitamos los sensores de los que queremos informacion
+        a.add("radar", true);
+        a.add("elevation", false);
+        a.add("magnetic", true);
+        a.add("gps", true);
+        a.add("fuel", true);
+        a.add("gonio", true);
+        
+        //Mandamos nuestro usuario y contraseña
+        a.add("user", "Ibbotson");
+        a.add("password", "oLARuosE");
+        
+        String mensaje = a.asString();        
+        return mensaje;
+    }
+    
+    /**
+    *
     * @author Kieran, Ana
     */
     @Override
@@ -372,13 +382,16 @@ public class AgenteSimple extends SuperAgent{
         String mapa = seleccionarMapa();
         Accion accion;
         //codificar el mensaje inicial JSON aqui
-        comunicar("nombre", "mensaje");
+        String mensaje = MensajeInicialJSON(mapa);
+        comunicar("nombre", mensaje);
+        
         while(true/*si el mensaje anterior es valido*/)
         {
             //comprobar si se esta en la meta aqui
             //funcion de utilidad/comprobar mejor casilla aqui
             //codificar respuesta JSON aqui
-            comunicar("nombre", "mensaje");
+            mensaje = JSONEncode();
+            comunicar("nombre", mensaje);
 
             if(!comprobarMeta()){
                 accion = comprobarAccion();
