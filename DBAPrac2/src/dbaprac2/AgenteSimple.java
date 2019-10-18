@@ -85,88 +85,88 @@ public class AgenteSimple extends SuperAgent{
         return moveN;
 
     }
-    
+
     /**
      * @author Pablo
-     * 
+     *
      * //Función para refuel
      * //Depende de la dirección
-     * 
+     *
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[0][0]>0)||(fuel<=5&&gps.z-radar[4][4]>0)||(fuel==0&&radar[5][5]==gps.z))
                     return refuel;
-                    
-            
+
+
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[0][5]>0)||(fuel<=5&&gps.z-radar[4][5]>0)||(fuel==0&&radar[5][5]==gps.z))
                     return refuel;
-            
+
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[0][10]>0)||(fuel<=5&&gps.z-radar[4][6]>0)||(fuel==0&&radar[5][5]==gps.z))
                     return refuel;
-            
-            
+
+
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[5][0]>0)||(fuel<=5&&gps.z-radar[5][4]>0)||(fuel==0&&radar[5][5]==gps.z))
                     return refuel;
-            
+
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[5][10]>0)||(fuel<=5&&gps.z-radar[5][6]>0)||(fuel==0&&radar[5][5]==gps.z))
                     return refuel;
-                    
-            
+
+
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[10][0]>0)||(fuel<=5&&gps.z-radar[6][4]>0)||(fuel==0&&radar[5][5]==gps.z))
-                    return refuel; 
-            
+                    return refuel;
+
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[5][10]>0)||(fuel<=5&&gps.z-radar[5][6]>0)||(fuel==0&&radar[5][5]==gps.z))
                     return refuel;
-                    
-            
+
+
             else if(fuel<=10)
                 if((fuel<=10&&gps.z-radar[10][10]>0)||(fuel<=5&&gps.z-radar[6][6]>0)||(fuel==0&&radar[5][5]==gps.z))
                     return refuel;
-                    
+
      //Condición para bajar
      //Dependede de dirección
-     
-      
+
+
             else if(gonio.distancia>fuel)
                 if((gps.z-radar[5][5]==fuel) && (radar[4][4]<=radar[5][5]) && (radar[3][3]<=radar[5][5]) && (radar[2][2]<=radar[5][5]) && (radar[1][1]<=radar[5][5]) && (radar[0][0]<=radar[5][5]) && (gps.z-5 >= 0))
                     return moveDW;
-                     
-            
+
+
             else if(gonio.distancia>fuel)
                 if((gps.z-radar[5][5]==fuel) && (radar[5][4]<=radar[5][5]) && (radar[5][3]<=radar[5][5]) && (radar[5][2]<=radar[5][5]) && (radar[5][1]<=radar[5][5]) && (radar[5][0]<=radar[5][5]) && (gps.z-5 >= 0))
                     return moveDW;
-                     
-            
+
+
             else if(gonio.distancia>fuel)
                 if((gps.z-radar[5][5]==fuel) && (radar[6][4]<=radar[5][5]) && (radar[7][3]<=radar[5][5]) && (radar[8][2]<=radar[5][5]) && (radar[9][1]<=radar[5][5]) && (radar[10][0]<=radar[5][5]) && (gps.z-5 >= 0))
                     return moveDW;
-                     
-            
+
+
             else if(gonio.distancia>fuel)
                 if((gps.z-radar[5][5]==fuel) && (radar[5][4]<=radar[5][5]) && (radar[5][3]<=radar[5][5]) && (radar[5][2]<=radar[5][5]) && (radar[5][1]<=radar[5][5]) && (radar[5][0]<=radar[5][5]) && (gps.z-5 >= 0))
                     return moveDW;
-                     
-            
+
+
             else if(gonio.distancia>fuel)
                 if((gps.z-radar[5][5]==fuel) && (radar[6][5]<=radar[5][5]) && (radar[7][5]<=radar[5][5]) && (radar[8][5]<=radar[5][5]) && (radar[9][5]<=radar[5][5]) && (radar[10][5]<=radar[5][5]) && (gps.z-5 >= 0))
                     return moveDW;
-                     
-            
+
+
             else if(gonio.distancia>fuel)
                 if((gps.z-radar[5][5]==fuel) && (radar[4][6]<=radar[5][5]) && (radar[3][7]<=radar[5][5]) && (radar[2][8]<=radar[5][5]) && (radar[1][9]<=radar[5][5]) && (radar[0][10]<=radar[5][5]) && (gps.z-5 >= 0))
                     return moveDW;
-             
-            
+
+
             else if(gonio.distancia>fuel)
                 if((gps.z-radar[5][5]==fuel) && (radar[5][6]<=radar[5][5]) && (radar[5][7]<=radar[5][5]) && (radar[5][8]<=radar[5][5]) && (radar[5][9]<=radar[5][5]) && (radar[5][10]<=radar[5][5]) && (gps.z-5 >= 0))
                     return moveDW;
-                    
-            
+
+
             else if(gonio.distancia>fuel)
                 if((gps.z-radar[5][5]==fuel) && (radar[6][6]<=radar[5][5]) && (radar[7][7]<=radar[5][5]) && (radar[8][8]<=radar[5][5]) && (radar[9][9]<=radar[5][5]) && (radar[10][10]<=radar[5][5]) && (gps.z-5 >= 0))
                     return moveDW;
@@ -177,80 +177,26 @@ public class AgenteSimple extends SuperAgent{
     * @author Ana
     */
     private Accion comprobarAccion(){
-        switch(siguienteAccion()) {
-          case moveNW:
-            if(radar[4][4]==0);
-                //Mensaje de error
-            else if(radar[4][4] == gps.z)
-              return siguienteAccion();
-            else if(radar[4][4] > gps.z && (gps.z+5 <= 0))
-              return moveUP;
-          break;
+      Accion accion = siguienteAccion();
+      int x, y;
 
-          case moveN:
-            if(radar[4][5]==0);
-                //Error
-            else if(radar[4][5] == gps.z)
-              return siguienteAccion();
-            else if(radar[4][5] > gps.z && (gps.z+5 <= 0))
-              return moveUP;
-          break;
+      switch(accion) {
+        case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
+        case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
+        case moveNE: x = 4; y = 6; break; //Comprobación del movimiento NE
+        case moveW: x = 5; y = 4; break; //Comprobación del movimiento W
+        case moveE: x = 5; y = 6; break; //Comprobación del movimiento E
+        case moveSW: x = 6; y = 4; break; //Comprobación del movimiento SW
+        case moveS: x = 6; y = 5; //Comprobación del movimiento S
+        case moveSE: x = 6; y = 6; //Comprobación del movimiento SE
+      }
 
-          case moveNE:
-            if(radar[4][6]==0);
-                //Error
-            else if(radar[4][6] == gps.z)
-              return siguienteAccion();
-            else if(radar[4][6] > gps.z && (gps.z+5 <= 0))
-              return moveUP;
-          break;
-
-          case moveW:
-            if(radar[5][4]==0);
-                //Error
-            else if(radar[5][4] == gps.z)
-              return siguienteAccion();
-            else if(radar[5][4] > gps.z && (gps.z+5 <= 0))
-              return moveUP;
-          break;
-
-          case moveE:
-            if(radar[5][6]==0);
-                //Error
-            else if(radar[5][6] == gps.z)
-              return siguienteAccion();
-            else if(radar[5][6] > gps.z && (gps.z+5 <= 0))
-              return moveUP;
-          break;
-
-          case moveSW:
-            if(radar[6][4]==0);
-                //Error
-            else if(radar[6][4] == gps.z)
-              return siguienteAccion();
-            else if(radar[6][4] > gps.z && (gps.z+5 <= 0))
-              return moveUP;
-          break;
-
-          case moveS:
-            if(radar[6][5]==0);
-                //Error
-            else if(radar[6][5] == gps.z)
-              return siguienteAccion();
-            else if(radar[6][5] > gps.z && (gps.z+5 <= 0))
-              return moveUP;
-          break;
-
-          case moveSE:
-            if(radar[6][6]==0);
-                //Error
-            else if(radar[6][6] == gps.z)
-              return siguienteAccion();
-            else if(radar[6][6] > gps.z && (gps.z+5 <= 0))
-              return moveUP;
-          break;
-        }
-        
+      if(radar[x][y]==0);
+          //Mensaje de error
+      else if(radar[x][y] <= gps.z)
+        return siguienteAccion();
+      else if(radar[x][y] > gps.z && (gps.z+5 <= 255))
+        return moveUP;
     }
 
     /**
@@ -268,14 +214,14 @@ public class AgenteSimple extends SuperAgent{
     private String JSONEncode(){ //Codificar variable en JSON
         //Pasa la informacion de GPS, fuel, gonio y radar
         JsonObject a = new JsonObject();
-        
-        //Añadimos pares <clave, valor>        
+
+        //Añadimos pares <clave, valor>
         a.add("command", command.toString());
         a.add("key", clave);
-        
+
         //Serializar el objeto en un String
         String resultado = a.toString();
-        
+
         return resultado;
     }
 
@@ -286,27 +232,27 @@ public class AgenteSimple extends SuperAgent{
     private void JSONDecode(String mensaje){//Decodifidar variables en JSON
         //Obtiene la informacion de GPS, fuel, gonio, radar, goal y crash
         JsonObject a = new JsonObject();
-        
+
         //Parsear el Strin original y almacenarlo en un objeto
         a = Json.parse(mensaje).asObject();
-        
+
         //Extraer los valores asociados a cada clave
         gps.x = a.get("gps").asObject().get("x").asInt();
         gps.y = a.get("gps").asObject().get("y").asInt();
         gps.z = a.get("gps").asObject().get("z").asInt();
-        
+
         fuel = a.get("fuel").asFloat();
-        
+
         gonio.angulo = a.get("gonio").asObject().get("angle").asFloat();
         gonio.distancia = a.get("gonio").asObject().get("distance").asFloat();
-        
+
         JsonArray vector_radar = a.get("radar").asArray();
         for(int i=0; i<radar.length; i++){
             for(int j=0; j<radar.length; j++){
                 radar[i][j] = vector_radar.get(j+i*radar.length).asInt();
             }
         }
-        
+
         goal = a.get("goal").asBoolean();
         crash = a.get("crash").asBoolean();
     }
@@ -356,7 +302,7 @@ public class AgenteSimple extends SuperAgent{
         //Iniciamos y mandamos el mapa que queremos
         a.add("command", "login");
         a.add("map", mapa);
-        
+
         //Solicitamos los sensores de los que queremos informacion
         a.add("radar", true);
         a.add("elevation", false);
@@ -364,15 +310,15 @@ public class AgenteSimple extends SuperAgent{
         a.add("gps", true);
         a.add("fuel", true);
         a.add("gonio", true);
-        
+
         //Mandamos nuestro usuario y contraseña
         a.add("user", "Ibbotson");
         a.add("password", "oLARuosE");
-        
-        String mensaje = a.asString();        
+
+        String mensaje = a.asString();
         return mensaje;
     }
-    
+
     /**
     *
     * @author Kieran, Ana
@@ -384,7 +330,7 @@ public class AgenteSimple extends SuperAgent{
         //codificar el mensaje inicial JSON aqui
         String mensaje = MensajeInicialJSON(mapa);
         comunicar("nombre", mensaje);
-        
+
         while(true/*si el mensaje anterior es valido*/)
         {
             //comprobar si se esta en la meta aqui
