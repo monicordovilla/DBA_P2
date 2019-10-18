@@ -9,8 +9,11 @@ import es.upv.dsic.gti_ia.core.ACLMessage;
 import es.upv.dsic.gti_ia.core.AgentID;
 import DBA.SuperAgent;
 import java.util.Scanner;
-import com.eclipsesource.json.JsonObject;
 import static dbaprac2.Accion.*;
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonValue;
 
 /**
  *
@@ -207,7 +210,7 @@ public class AgenteSimple extends SuperAgent{
               return moveUP;
           break;
         }
-
+        
     }
 
     /**
@@ -222,17 +225,68 @@ public class AgenteSimple extends SuperAgent{
     *
     * @author Kieran, Monica
     */
-    private String JSONEncode(){
+    private String JSONEncode(){ //Codificar variable en JSON
+        //Pasa la informacion de GPS, fuel, gonio y radar
         JsonObject a = new JsonObject();
-        return a.toString();
+        
+        //Añadimos pares <clave, valor>        
+        JsonObject gps_json = new JsonObject();
+        gps_json.add("x", gps.x);
+        gps_json.add("y", gps.y);
+        gps_json.add("z", gps.z);
+        a.add("gps", gps_json);
+        
+        a.add("fuel", fuel);
+        
+        JsonObject gonio_json = new JsonObject();
+        gonio_json.add("distance", gonio.distancia);
+        gonio_json.add("angle", gonio.angulo);
+        a.add("gonio", gonio_json);
+        
+        JsonArray radar_json = new JsonArray();
+        for(int i=0; i<radar.length; i++){
+            for(int j=0; j<radar.length; j++){
+                radar_json.add(radar[i][j]);
+            }
+        }
+        a.add("radar", radar_json);
+        
+        //Serializar el objeto en un String
+        String resultado = a.toString();
+        
+        return resultado;
     }
 
     /**
     *
     * @author Monica
     */
-    private void JSONDecode(String mensaje){
+    private void JSONDecode(String mensaje){//Decodifidar variables en JSON
+        //Obtiene la informacion de GPS, fuel, gonio, radar, goal y crash
         JsonObject a = new JsonObject();
+        
+        //Parsear el Strin original y almacenarlo en un objeto
+        a = Json.parse(mensaje).asObject();
+        
+        //Extraer los valores asociados a cada clave
+        gps.x = a.get("gps").asObject().get("x").asInt();
+        gps.y = a.get("gps").asObject().get("y").asInt();
+        gps.z = a.get("gps").asObject().get("z").asInt();
+        
+        fuel = a.get("fuel").asFloat();
+        
+        gonio.angulo = a.get("gonio").asObject().get("angle").asFloat();
+        gonio.distancia = a.get("gonio").asObject().get("distance").asFloat();
+        
+        JsonArray vector_radar = a.get("radar").asArray();
+        for(int i=0; i<radar.length; i++){
+            for(int j=0; j<radar.length; j++){
+                radar[i][j] = vector_radar.get(j+i*radar.length).asInt();
+            }
+        }
+        
+        goal = a.get("goal").asBoolean();
+        crash = a.get("crash").asBoolean();
     }
 
 
