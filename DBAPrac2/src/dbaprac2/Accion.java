@@ -20,5 +20,6 @@ public enum Accion {
     moveSE,
     moveUP,
     moveDW,
-    refuel
+    refuel,
+    logout
 }
