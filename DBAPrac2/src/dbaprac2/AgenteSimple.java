@@ -122,7 +122,7 @@ public class AgenteSimple extends SuperAgent{
       
       if(necesitaRepostar() || comprobarMeta()) {
           if(gps.z == radar[5][5]){
-            return (comprobarMeta())?refuel:logout;
+            return ((comprobarMeta())?logout:refuel);
           }
           return moveDW;
       }
@@ -180,7 +180,7 @@ public class AgenteSimple extends SuperAgent{
     private void JSONDecode(JsonObject mensaje){//Decodifidar variables en JSON
         //Obtiene la informacion de GPS, fuel, gonio, radar, goal y status
         JsonObject a;
-        a = mensaje;
+        a = mensaje.get("perceptions").asObject();
         
 
         //Extraer los valores asociados a cada clave
@@ -328,15 +328,17 @@ public class AgenteSimple extends SuperAgent{
         
         while(validarRespuesta(respuesta))
         {
+         
             respuesta = escuchar();
             JSONDecode(respuesta);
             
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
+            
+            System.out.println(command.toString());
+            
             if(goal || command == logout){
                 break; //Hemos acabado
             }
-            
-            System.out.println(command.toString());
             
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
