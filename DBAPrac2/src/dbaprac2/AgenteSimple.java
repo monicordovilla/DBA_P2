@@ -59,6 +59,7 @@ public class AgenteSimple extends SuperAgent{
         min_x = 0;
         min_y = 0;
         min_z = 0;
+        max_z = 255;
     }
 
     /**
@@ -118,12 +119,19 @@ public class AgenteSimple extends SuperAgent{
         case moveS: x = 6; y = 5; break;//Comprobación del movimiento S
         case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
       }
+      
+      if(necesitaRepostar() || comprobarMeta()) {
+          if(gps.z == radar[5][5]){
+            return (comprobarMeta())?refuel:logout;
+          }
+          return moveDW;
+      }
 
       if(radar[x][y]==0)
           return logout;
       else if(radar[x][y] <= gps.z)
         return accion;
-      else if(radar[x][y] > gps.z && (gps.z+5 <= 255))
+      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z))
         return moveUP;
       
       return logout;
@@ -131,10 +139,18 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
-    * @author Celia
+    * @author Kieran
+    */
+    private boolean necesitaRepostar(){ //Mira si hace falta repostar el agente, 5 uds de altura gasta 0.5 uds de fuel, 1u altura = 0.1u fuel
+       return (fuel < max_z/10.0); //Provisional, max_z es la altura maxima y por tanto la maxima distancia del suelo al que puede estar el agente.
+    }
+    
+    /**
+    *
+    * @author Celia, Kieran
     */
     private boolean comprobarMeta(){
-        return gonio.distancia==0;
+        return gonio.distancia<=1;
     }
 
 //METODOS DE JSON: Codifican y descodifican los mensajes en formato JSON para facilitar el manejo de los datos recibidos
@@ -315,10 +331,8 @@ public class AgenteSimple extends SuperAgent{
             respuesta = escuchar();
             JSONDecode(respuesta);
             
-            if(!goal){ //comprobar si se esta en la meta aqui
-                command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
-            }
-            else{
+            command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
+            if(goal || command == logout){
                 break; //Hemos acabado
             }
             
