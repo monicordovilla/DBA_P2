@@ -13,15 +13,12 @@ import static dbaprac2.Accion.*;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonValue;
 
 /**
  *
  * @author Kieran, Monica
  */
 public class AgenteSimple extends SuperAgent{
-
-    //  Añadir string para guardar el mensaje anteriormente recibido aqui
 
     private class GPS {
         public int x;
@@ -38,18 +35,30 @@ public class AgenteSimple extends SuperAgent{
     }
 
     static int tamanio_radar = 11;
-    GPS gps = new GPS();
-    Gonio gonio =new Gonio();
+    GPS gps;
+    Gonio gonio;
     float fuel;
     int[][] radar;
     boolean goal;
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
     String clave;   //Clave que hay que enviar con cada comando que se envía
+    
+    int min_x;
+    int max_x;
+    int min_y;
+    int max_y;
+    int min_z;
+    int max_z;
 
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
         radar = new int[tamanio_radar][tamanio_radar];
+        gonio = new Gonio();
+        gps = new GPS();
+        min_x = 0;
+        min_y = 0;
+        min_z = 0;
     }
 
     /**
@@ -62,6 +71,8 @@ public class AgenteSimple extends SuperAgent{
         String mapa_seleccionado = s.nextLine();
         return mapa_seleccionado;
     }
+
+//METODOS DE EVALUACIÓN: La funcionalidad inteligente del agente, para decidir que hacer
 
     /**
     *
@@ -126,6 +137,8 @@ public class AgenteSimple extends SuperAgent{
         return gonio.distancia==0;
     }
 
+//METODOS DE JSON: Codifican y descodifican los mensajes en formato JSON para facilitar el manejo de los datos recibidos
+
     /**
     *
     * @author Kieran, Monica
@@ -146,14 +159,12 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
-    * @author Monica
+    * @author Monica, Kieran
     */
-    private void JSONDecode(String mensaje){//Decodifidar variables en JSON
+    private void JSONDecode(JsonObject mensaje){//Decodifidar variables en JSON
         //Obtiene la informacion de GPS, fuel, gonio, radar, goal y status
         JsonObject a;
-
-        //Parsear el Strin original y almacenarlo en un objeto
-        a = Json.parse(mensaje).asObject().get("perceptions").asObject();
+        a = mensaje;
         
 
         //Extraer los valores asociados a cada clave
@@ -179,47 +190,22 @@ public class AgenteSimple extends SuperAgent{
         status = a.get("status").toString();
     }
 
-
     /**
     *
     * @author Kieran
     */
-    private void comunicar(String nombre, String mensaje) {
-        ACLMessage outbox = new ACLMessage();
-        outbox.setSender(this.getAid());
-        outbox.setReceiver(new AgentID(nombre));
-        outbox.setContent(mensaje);
-        this.send(outbox);
+    private void JSONDecode_Inicial(JsonObject mensaje){//Decodifica el primer mensaje con atributos del mapa
+        max_x = mensaje.get("dimx").asInt();
+        max_y = mensaje.get("dimy").asInt();
+        min_z = mensaje.get("min").asInt();
+        max_z = mensaje.get("max").asInt();
+        clave = mensaje.get("key").asString();
     }
-
-    /**
-    *
-    * @author Kieran
-    */
-    private String escuchar() {
-        ACLMessage inbox;
-        try{
-            inbox = this.receiveACLMessage();
-        }
-        catch(Exception e){
-            System.out.println("Error de comunicación: Excepción al escuchar");
-            return "ERROR";
-        }
-        String mensaje = inbox.getContent();
-        System.out.println("Mensaje recibido:\n" + mensaje);
-        return mensaje;
-    }
-
-    @Override
-    public void init() { //Opcional
-        System.out.println("\nInicializado");
-    }
-
     /**
     *
     * @author Monica
     */
-    private String MensajeInicialJSON(String mapa){
+    private String JSONEncode_Inicial(String mapa){
         JsonObject a = new JsonObject();
         //Iniciamos y mandamos el mapa que queremos
         a.add("command", "login");
@@ -240,6 +226,73 @@ public class AgenteSimple extends SuperAgent{
         String mensaje = a.toString();
         return mensaje;
     }
+    
+    /**
+    * 
+    * @author Kieran 
+    */
+    private boolean validarRespuesta(JsonObject respuesta){
+        boolean valido = respuesta.get("result").asString().equals("ok");
+        if(!valido){
+            System.out.println("Error in response to '" + respuesta.get("in-reply-to").asString() + "': " + respuesta.get("result").asString());
+        }
+        return valido;
+    }
+
+//METODOS DE COMUNICACIÓN: Mandan mensajes al agente en el lado del servidor
+    
+    /**
+    *
+    * @author Kieran
+    */
+    private void comunicar(String nombre, String mensaje) {
+        ACLMessage outbox = new ACLMessage();
+        outbox.setSender(this.getAid());
+        outbox.setReceiver(new AgentID(nombre));
+        outbox.setContent(mensaje);
+        this.send(outbox);
+    }
+
+    /**
+    *
+    * @author Kieran
+    */
+    private JsonObject escuchar() {
+        ACLMessage inbox;
+        try{
+            inbox = this.receiveACLMessage();
+        }
+        catch(Exception e){
+            System.out.println("Error de comunicación: Excepción al escuchar");
+            return null;
+        }
+        String mensaje = inbox.getContent();
+        System.out.println("Mensaje recibido:\n" + mensaje);
+        return Json.parse(mensaje).asObject();
+    }
+    
+    /**
+    *
+    * @author Kieran, Celia
+    */
+    private void logout() {
+        command = logout;
+        String mensaje = JSONEncode(); //codificar respuesta JSON aqui
+        comunicar("Izar", mensaje);
+        
+        JsonObject respuesta = escuchar();
+        if(validarRespuesta(respuesta)){
+            respuesta = escuchar();
+            System.out.println("Traza recibido: " + respuesta.get("trace").asString());
+        }
+    }
+
+//METODOS DE SUPERAGENT: Métodos sobreescritos y heredados de la clase SuperAgent
+    
+    @Override
+    public void init() { //Opcional
+        System.out.println("\nInicializado");
+    }
 
     /**
     *
@@ -250,41 +303,33 @@ public class AgenteSimple extends SuperAgent{
         String mapa = seleccionarMapa();
         
         //codificar el mensaje inicial JSON aqui
-        String mensaje = MensajeInicialJSON(mapa);
+        String mensaje = JSONEncode_Inicial(mapa);
         comunicar("Izar", mensaje);
         
-        String respuesta = escuchar();
-        JsonObject a = Json.parse(respuesta).asObject();
+        JsonObject respuesta = escuchar();
         
-        clave = a.get("key").asString();
+        JSONDecode_Inicial(respuesta);        
         
-        
-        while(a.get("result").asString().equals("ok"))
+        while(validarRespuesta(respuesta))
         {
-            //comprobar si se esta en la meta aqui
-            //funcion de utilidad/comprobar mejor casilla aqui
-            //codificar respuesta JSON aqui
-            
             respuesta = escuchar();
             JSONDecode(respuesta);
             
-            if(!goal)
-                command = comprobarAccion();
-            else
-                command = logout;
-                
-          
+            if(!goal){ //comprobar si se esta en la meta aqui
+                command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
+            }
+            else{
+                break; //Hemos acabado
+            }
             
             System.out.println(command.toString());
             
-            mensaje = JSONEncode();
+            mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
             respuesta = escuchar();
-            a = Json.parse(respuesta).asObject();
         }
         
-        respuesta = escuchar();
-
+        logout();
     }
 
     @Override
