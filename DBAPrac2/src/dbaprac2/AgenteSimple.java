@@ -103,7 +103,7 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
-    * @author Ana
+    * @author Ana, Kieran
     */
     private Accion comprobarAccion(){
       Accion accion = siguienteAccion();
