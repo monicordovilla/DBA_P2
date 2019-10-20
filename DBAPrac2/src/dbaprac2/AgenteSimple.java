@@ -160,7 +160,6 @@ public class AgenteSimple extends SuperAgent{
     * @author Kieran, Ana
     */
     private boolean necesitaRepostar(){ //Mira si hace falta repostar el agente, 5 uds de altura gasta 0.5 uds de fuel, 1u altura = 0.1u fuel
-       //return (fuel < max_z/10.0); //Provisional, max_z es la altura maxima y por tanto la maxima distancia del suelo al que puede estar el agente.
        return (fuel <= (movimientosBajada() * consumo_fuel) + consumo_fuel); //En la altura a la que estamos el fuel necesario para llegar al suelo sin problema.
     }
 
