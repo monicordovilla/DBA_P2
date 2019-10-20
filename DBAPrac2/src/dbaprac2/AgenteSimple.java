@@ -54,9 +54,6 @@ public class AgenteSimple extends SuperAgent{
     int unidades_updown; //Unidades que consume las bajadas y subidas
     int consumo_fuel; //Consumo de fuel por movimiento
 
-    Accion accion_actual;
-    Accion accion_anterior;
-
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
         radar = new int[tamanio_radar][tamanio_radar];
@@ -68,8 +65,6 @@ public class AgenteSimple extends SuperAgent{
         max_z = 255;
         unidades_updown = 5;
         consumo_fuel = 0.5;
-        accion_actual = null;
-        accion_anterior = null;
     }
 
     /**
@@ -117,9 +112,7 @@ public class AgenteSimple extends SuperAgent{
     * Se comprueba si se puede realizar la acción más prometedora
     */
     private Accion comprobarAccion(){
-      accion_anterior = accion_actual;
       Accion accion = siguienteAccion();
-
       int x=5, y=5;
 
       switch(accion) {
@@ -135,26 +128,19 @@ public class AgenteSimple extends SuperAgent{
 
       if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se puede repostar o se ha llegado a la meta
           if(gps.z == radar[5][5]){
-            if(comprobarMeta())
-              accion_actual = logout;
-            else
-              accion_actual = refuel;
-
-            return accion_actual;
+            return ((comprobarMeta())?logout:refuel);
           }
-
-          accion_actual = moveDW;
-          return accion_actual;
+          return moveDW;
       }
 
       if(radar[x][y]==0)
-          accion_actual = logout;
+          return logout;
       else if(radar[x][y] <= gps.z) //No hay obstaculos y se puede realizar la acción más prometedora
-        accion_actual = accion;
+        return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z)) //Hay obstaculos y necesitamos superarlos
-        accion_actual = moveUP;
+        return moveUP;
 
-      return accion_actual;
+      return logout;
     }
 
     /**
