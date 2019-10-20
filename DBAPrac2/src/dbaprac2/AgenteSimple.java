@@ -16,7 +16,7 @@ import com.eclipsesource.json.JsonArray;
 
 /**
  *
- * @author Kieran, Monica
+ * @author Kieran, Monica, Ana
  */
 public class AgenteSimple extends SuperAgent{
 
@@ -43,13 +43,16 @@ public class AgenteSimple extends SuperAgent{
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
     String clave;   //Clave que hay que enviar con cada comando que se envía
-    
+
     int min_x;
     int max_x;
     int min_y;
     int max_y;
     int min_z;
     int max_z;
+
+    int unidades_updown; //Unidades que consume las bajadas y subidas
+    int consumo_fuel; //Consumo de fuel por movimiento
 
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
@@ -60,6 +63,8 @@ public class AgenteSimple extends SuperAgent{
         min_y = 0;
         min_z = 0;
         max_z = 255;
+        unidades_updown = 5;
+        consumo_fuel = 0.5;
     }
 
     /**
@@ -104,6 +109,7 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Ana, Kieran
+    * Se comprueba si se puede realizar la acción más prometedora
     */
     private Accion comprobarAccion(){
       Accion accion = siguienteAccion();
@@ -119,8 +125,8 @@ public class AgenteSimple extends SuperAgent{
         case moveS: x = 6; y = 5; break;//Comprobación del movimiento S
         case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
       }
-      
-      if(necesitaRepostar() || comprobarMeta()) {
+
+      if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se puede repostar o se ha llegado a la meta
           if(gps.z == radar[5][5]){
             return ((comprobarMeta())?logout:refuel);
           }
@@ -129,22 +135,34 @@ public class AgenteSimple extends SuperAgent{
 
       if(radar[x][y]==0)
           return logout;
-      else if(radar[x][y] <= gps.z)
+      else if(radar[x][y] <= gps.z) //No hay obstaculos y se puede realizar la acción más prometedora
         return accion;
-      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z))
+      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z)) //Hay obstaculos y necesitamos superarlos
         return moveUP;
-      
+
       return logout;
     }
 
     /**
     *
-    * @author Kieran
+    * @author Ana
+    * Calcula cuantos movimientos de bajada vamos a necesitar para llegar al suelo
+    */
+    private int movimientosBajada(){
+      int movs = 0;
+      movs = gps.z / unidades_updown; //Cada bajada conlleva 5 unidades. Calculamos en funcion de la altura cuantos movimientos necesitamos para llegar al suelo
+      return movs;
+    }
+
+    /**
+    *
+    * @author Kieran, Ana
     */
     private boolean necesitaRepostar(){ //Mira si hace falta repostar el agente, 5 uds de altura gasta 0.5 uds de fuel, 1u altura = 0.1u fuel
-       return (fuel < max_z/10.0); //Provisional, max_z es la altura maxima y por tanto la maxima distancia del suelo al que puede estar el agente.
+       //return (fuel < max_z/10.0); //Provisional, max_z es la altura maxima y por tanto la maxima distancia del suelo al que puede estar el agente.
+       return (fuel < movimientosBajada() * consumo_fuel); //En la altura a la que estamos el fuel necesario para llegar al suelo sin problema.
     }
-    
+
     /**
     *
     * @author Celia, Kieran
@@ -181,7 +199,7 @@ public class AgenteSimple extends SuperAgent{
         //Obtiene la informacion de GPS, fuel, gonio, radar, goal y status
         JsonObject a;
         a = mensaje.get("perceptions").asObject();
-        
+
 
         //Extraer los valores asociados a cada clave
         gps.x = a.get("gps").asObject().get("x").asInt();
@@ -189,10 +207,10 @@ public class AgenteSimple extends SuperAgent{
         gps.z = a.get("gps").asObject().get("z").asInt();
 
         fuel = a.get("fuel").asFloat();
-        
+
         gonio.angulo = a.get("gonio").asObject().get("angle").asFloat();
         gonio.distancia = a.get("gonio").asObject().get("distance").asFloat();
-        
+
 
         JsonArray vector_radar = a.get("radar").asArray();
         for(int i=0; i<radar.length; i++){
@@ -200,7 +218,7 @@ public class AgenteSimple extends SuperAgent{
                 radar[i][j] = vector_radar.get(j+i*radar.length).asInt();
             }
         }
-        
+
 
         goal = a.get("goal").asBoolean();
         status = a.get("status").toString();
@@ -242,10 +260,10 @@ public class AgenteSimple extends SuperAgent{
         String mensaje = a.toString();
         return mensaje;
     }
-    
+
     /**
-    * 
-    * @author Kieran 
+    *
+    * @author Kieran
     */
     private boolean validarRespuesta(JsonObject respuesta){
         boolean valido = respuesta.get("result").asString().equals("ok");
@@ -256,7 +274,7 @@ public class AgenteSimple extends SuperAgent{
     }
 
 //METODOS DE COMUNICACIÓN: Mandan mensajes al agente en el lado del servidor
-    
+
     /**
     *
     * @author Kieran
@@ -286,7 +304,7 @@ public class AgenteSimple extends SuperAgent{
         System.out.println("Mensaje recibido:\n" + mensaje);
         return Json.parse(mensaje).asObject();
     }
-    
+
     /**
     *
     * @author Kieran, Celia
@@ -295,7 +313,7 @@ public class AgenteSimple extends SuperAgent{
         command = logout;
         String mensaje = JSONEncode(); //codificar respuesta JSON aqui
         comunicar("Izar", mensaje);
-        
+
         JsonObject respuesta = escuchar();
         if(validarRespuesta(respuesta)){
             respuesta = escuchar();
@@ -304,7 +322,7 @@ public class AgenteSimple extends SuperAgent{
     }
 
 //METODOS DE SUPERAGENT: Métodos sobreescritos y heredados de la clase SuperAgent
-    
+
     @Override
     public void init() { //Opcional
         System.out.println("\nInicializado");
@@ -317,34 +335,34 @@ public class AgenteSimple extends SuperAgent{
     @Override
     public void execute() {
         String mapa = seleccionarMapa();
-        
+
         //codificar el mensaje inicial JSON aqui
         String mensaje = JSONEncode_Inicial(mapa);
         comunicar("Izar", mensaje);
-        
+
         JsonObject respuesta = escuchar();
-        
-        JSONDecode_Inicial(respuesta);        
-        
+
+        JSONDecode_Inicial(respuesta);
+
         while(validarRespuesta(respuesta))
         {
-         
+
             respuesta = escuchar();
             JSONDecode(respuesta);
-            
+
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
-            
+
             System.out.println(command.toString());
-            
+
             if(goal || command == logout){
                 break; //Hemos acabado
             }
-            
+
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
             respuesta = escuchar();
         }
-        
+
         logout();
     }
 
