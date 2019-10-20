@@ -42,6 +42,7 @@ public class AgenteSimple extends SuperAgent{
     boolean goal;
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
+    Accion accion_anterior //Acción anterior
     String clave;   //Clave que hay que enviar con cada comando que se envía
 
     int min_x;
@@ -350,6 +351,7 @@ public class AgenteSimple extends SuperAgent{
             respuesta = escuchar();
             JSONDecode(respuesta);
 
+            accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
             System.out.println(command.toString());
