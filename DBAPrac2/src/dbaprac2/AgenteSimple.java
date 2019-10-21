@@ -13,6 +13,11 @@ import static dbaprac2.Accion.*;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonArray;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -42,7 +47,7 @@ public class AgenteSimple extends SuperAgent{
     boolean goal;
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
-    Accion accion_anterior //Acción anterior
+    Accion accion_anterior; //Acción anterior
     String clave;   //Clave que hay que enviar con cada comando que se envía
 
     int min_x;
@@ -53,7 +58,7 @@ public class AgenteSimple extends SuperAgent{
     int max_z;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
-    int consumo_fuel; //Consumo de fuel por movimiento
+    double consumo_fuel; //Consumo de fuel por movimiento
 
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
@@ -100,7 +105,7 @@ public class AgenteSimple extends SuperAgent{
             return moveW;
         if(gonio.angulo>=292.5 && gonio.angulo<337.5)
             return moveNW;
-        if(gonio.angulo>=337.5 && gonio.angulo<22.5)
+        if(gonio.angulo>=337.5 || gonio.angulo<22.5)
             return moveN;
         return logout;
 
@@ -146,12 +151,12 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
-    * @author Ana
+    * @author Ana, Kieran
     * Calcula cuantos movimientos de bajada vamos a necesitar para llegar al suelo
     */
-    private int movimientosBajada(){
-      int movs = 0;
-      movs = gps.z / unidades_updown; //Cada bajada conlleva 5 unidades. Calculamos en funcion de la altura cuantos movimientos necesitamos para llegar al suelo
+    private int unidadesBajada(){
+      int movs;
+      movs = gps.z - radar[5][5]; //Cada bajada conlleva 5 unidades. Calculamos en funcion de la altura cuantos movimientos necesitamos para llegar al suelo
       return movs;
     }
 
@@ -160,7 +165,7 @@ public class AgenteSimple extends SuperAgent{
     * @author Kieran, Ana
     */
     private boolean necesitaRepostar(){ //Mira si hace falta repostar el agente, 5 uds de altura gasta 0.5 uds de fuel, 1u altura = 0.1u fuel
-       return (fuel <= (movimientosBajada() * consumo_fuel) + consumo_fuel); //En la altura a la que estamos el fuel necesario para llegar al suelo sin problema.
+       return (fuel <= (unidadesBajada() * consumo_fuel) + 2*consumo_fuel*unidades_updown); //En la altura a la que estamos el fuel necesario para llegar al suelo sin problema.
     }
 
     /**
@@ -291,7 +296,15 @@ public class AgenteSimple extends SuperAgent{
     *
     * @author Kieran
     */
-    private JsonObject escuchar() {
+    private JsonObject escuchar(){
+        return escuchar(false);
+    }
+    
+    /**
+    *
+    * @author Kieran
+    */
+    private JsonObject escuchar(boolean echo) {
         ACLMessage inbox;
         try{
             inbox = this.receiveACLMessage();
@@ -301,7 +314,7 @@ public class AgenteSimple extends SuperAgent{
             return null;
         }
         String mensaje = inbox.getContent();
-        System.out.println("Mensaje recibido:\n" + mensaje);
+        if(echo) System.out.println("Mensaje recibido:\n" + mensaje);
         return Json.parse(mensaje).asObject();
     }
 
@@ -314,10 +327,31 @@ public class AgenteSimple extends SuperAgent{
         String mensaje = JSONEncode(); //codificar respuesta JSON aqui
         comunicar("Izar", mensaje);
 
-        JsonObject respuesta = escuchar();
+        JsonObject respuesta = escuchar(true);
         if(validarRespuesta(respuesta)){
-            respuesta = escuchar();
-            System.out.println("Traza recibido: " + respuesta.get("trace").asString());
+            respuesta = escuchar(true);
+            guardarTraza(respuesta);
+        }
+    }
+    
+    /**
+    *
+    * @author Kieran
+    */
+    private void guardarTraza(JsonObject respuesta){
+        FileOutputStream fos = null;
+        try {
+            JsonArray ja = respuesta.get("trace").asArray();
+            byte data[] = new byte [ja.size()];
+            for(int i=0; i<data.length;i++){
+                data[i] = (byte) ja.get(i).asInt();
+            }
+            fos = new FileOutputStream("trace.png");
+            fos.write(data);
+            fos.close();
+            System.out.println("Traza guardada");
+        } catch (Exception ex) {
+            Logger.getLogger(AgenteSimple.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -347,7 +381,7 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar();
+            respuesta = escuchar(true);
             JSONDecode(respuesta);
 
             accion_anterior = command;
@@ -361,7 +395,7 @@ public class AgenteSimple extends SuperAgent{
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar();
+            respuesta = escuchar(true);
         }
 
         logout();
