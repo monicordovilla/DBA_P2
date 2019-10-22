@@ -131,8 +131,9 @@ public class AgenteSimple extends SuperAgent{
         case moveS: x = 6; y = 5; break;//Comprobación del movimiento S
         case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
       }
-
-      if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se puede repostar o se ha llegado a la meta
+       //No quería quitar esta`parte
+      //if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se puede repostar o se ha llegado a la meta
+      if(necesitaRepostar(accion) || comprobarMeta()) { // Se comprueba si se puede repostar o se ha llegado a la meta
           if(gps.z == radar[5][5]){
             return ((comprobarMeta())?logout:refuel);
           }
@@ -160,13 +161,62 @@ public class AgenteSimple extends SuperAgent{
       return movs;
     }
 
+    
+    /**
+    *
+    * @author Pablo
+    */
+    private boolean necesitaRepostar(Accion accion){//Toma como parámtro la acción inmediatamente anterior, para comprobar la dirección a la que se dirige
+        //Suponiendo que seguirá la dirección que tomo en el último movimiento, el agente comprueba si tiene combustible suficiente para repostar en cualquiera de los 5 puntos más próximos en esa dirección
+        boolean necesita=false;
+        switch(accion) {
+        case moveNW: 
+            if ((fuel<=(6*consumo_fuel)+(gps.z-(radar[0][0]*0.1)))&&(fuel<=(5*consumo_fuel)+(gps.z-(radar[1][1])))&&(fuel<=(4*consumo_fuel)+(gps.z-(radar[2][2]*0.1)))&&(fuel<=(3*consumo_fuel)+(gps.z-(radar[3][3]*0.1)))&&(fuel<=(2*consumo_fuel)+(gps.z-(radar[4][4]*0.1))));
+                necesita=true;
+            break; //Comprueba si podría repostar si continuase en dirección NW
+        case moveN: 
+            if ((fuel<=(6*consumo_fuel)+(gps.z-(radar[0][5]*0.1)))&&(fuel<=(5*consumo_fuel)+(gps.z-(radar[1][5])))&&(fuel<=(4*consumo_fuel)+(gps.z-(radar[2][5]*0.1)))&&(fuel<=(3*consumo_fuel)+(gps.z-(radar[3][5]*0.1)))&&(fuel<=(2*consumo_fuel)+(gps.z-(radar[4][5]*0.1))));
+                necesita=true;
+            break; //Comprueba si podría repostar si continuase en dirección N
+        case moveNE: 
+            if ((fuel<=(6*consumo_fuel)+(gps.z-(radar[0][10]*0.1)))&&(fuel<=(5*consumo_fuel)+(gps.z-(radar[1][9])))&&(fuel<=(4*consumo_fuel)+(gps.z-(radar[2][8]*0.1)))&&(fuel<=(3*consumo_fuel)+(gps.z-(radar[3][7]*0.1)))&&(fuel<=(2*consumo_fuel)+(gps.z-(radar[4][6]*0.1))));
+                necesita=true;
+            break; //Comprueba si podría repostar si continuase en dirección NE
+        case moveW: 
+            if ((fuel<=(6*consumo_fuel)+(gps.z-(radar[5][0]*0.1)))&&(fuel<=(5*consumo_fuel)+(gps.z-(radar[5][1])))&&(fuel<=(4*consumo_fuel)+(gps.z-(radar[5][2]*0.1)))&&(fuel<=(3*consumo_fuel)+(gps.z-(radar[5][3]*0.1)))&&(fuel<=(2*consumo_fuel)+(gps.z-(radar[5][4]*0.1))));
+                necesita=true;
+            break; //Comprueba si podría repostar si continuase en dirección W
+        case moveE: 
+            if ((fuel<=(6*consumo_fuel)+(gps.z-(radar[5][10]*0.1)))&&(fuel<=(5*consumo_fuel)+(gps.z-(radar[5][9])))&&(fuel<=(4*consumo_fuel)+(gps.z-(radar[5][8]*0.1)))&&(fuel<=(3*consumo_fuel)+(gps.z-(radar[5][7]*0.1)))&&(fuel<=(2*consumo_fuel)+(gps.z-(radar[5][6]*0.1))));
+                necesita=true;
+            break; //Comprueba si podría repostar si continuase en dirección E
+        case moveSW: 
+            if ((fuel<=(6*consumo_fuel)+(gps.z-(radar[10][0]*0.1)))&&(fuel<=(5*consumo_fuel)+(gps.z-(radar[9][1])))&&(fuel<=(4*consumo_fuel)+(gps.z-(radar[8][2]*0.1)))&&(fuel<=(3*consumo_fuel)+(gps.z-(radar[7][3]*0.1)))&&(fuel<=(2*consumo_fuel)+(gps.z-(radar[6][4]*0.1))));
+                necesita=true;
+            break; //Comprueba si podría repostar si continuase en dirección SW
+        case moveS: 
+            if ((fuel<=(6*consumo_fuel)+(gps.z-(radar[10][5]*0.1)))&&(fuel<=(5*consumo_fuel)+(gps.z-(radar[9][5])))&&(fuel<=(4*consumo_fuel)+(gps.z-(radar[8][5]*0.1)))&&(fuel<=(3*consumo_fuel)+(gps.z-(radar[7][5]*0.1)))&&(fuel<=(2*consumo_fuel)+(gps.z-(radar[6][5]*0.1))));
+                necesita=true;
+            break; //Comprueba si podría repostar si continuase en dirección S
+        case moveSE: 
+            if ((fuel<=(6*consumo_fuel)+(gps.z-(radar[10][10]*0.1)))&&(fuel<=(5*consumo_fuel)+(gps.z-(radar[9][9])))&&(fuel<=(4*consumo_fuel)+(gps.z-(radar[8][8]*0.1)))&&(fuel<=(3*consumo_fuel)+(gps.z-(radar[7][7]*0.1)))&&(fuel<=(2*consumo_fuel)+(gps.z-(radar[6][6]*0.1))));
+                necesita=true;
+            break; //Comprueba si podría repostar si continuase en dirección SE
+      }
+        if(fuel<=(unidadesBajada()*0.1)+consumo_fuel)necesita=false;//Aunque no tenga combustible suficiente para seguir avanzando, si no tiene suficiente para bajarm que siga hacia adelante
+        return necesita;
+    }
+    
+    
     /**
     *
     * @author Kieran, Ana
     */
+    /*
     private boolean necesitaRepostar(){ //Mira si hace falta repostar el agente, 5 uds de altura gasta 0.5 uds de fuel, 1u altura = 0.1u fuel
        return (fuel <= (unidadesBajada() * consumo_fuel) + 2*consumo_fuel*unidades_updown); //En la altura a la que estamos el fuel necesario para llegar al suelo sin problema.
-    }
+       
+    }*/
 
     /**
     *
