@@ -92,61 +92,65 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Monica
+    * Comprueba si la siguiente accion a realizar es un obstaculo
     */
-    private boolean esObstaculo(Accion sigAccion){
-        boolean obstaculo = false;
+    private boolean puedeSubir(Accion sigAccion){
+        boolean sube = true;
+        max_z = 180;
         
+        
+        //si en la siguiente accion, la altura del drone es mayor es un obstáculo
         switch(sigAccion) {
             case moveNW:
                 if (radar[gps.x-1][gps.y+1] >= max_z){
-                    obstaculo = true;
+                    sube = false;
                 }
                 break;
                 
             case moveN:
                 if (radar[gps.x][gps.y+1] >= max_z){
-                    obstaculo = true;
+                    sube = false;
                 }
             break;
             
             case moveNE:
                 if (radar[gps.x+1][gps.y+1] >= max_z){
-                    obstaculo = true;
+                    sube = false;
                 }
             break;
             
             case moveW:
                 if (radar[gps.x-1][gps.y] >= max_z){
-                    obstaculo = true;
+                    sube = false;
                 }
             break;
             
             case moveE:
                 if (radar[gps.x+1][gps.y] >= max_z){
-                    obstaculo = true;
+                    sube = false;
                 }
             break;
             
             case moveSW:
                 if (radar[gps.x-1][gps.y-1] >= max_z){
-                    obstaculo = true;
+                    sube = false;
                 }
             break;
             
             case moveS:
                 if (radar[gps.x][gps.y-1] >= max_z){
-                    obstaculo = true;
+                    sube = false;
                 }
             break;
             
             case moveSE:
                 if (radar[gps.x+1][gps.y-1] >= max_z){
-                    obstaculo = true;
+                    sube = false;
                 }
             break;
       }
         
-        return obstaculo;
+        return sube;
     }
     
     /**
@@ -177,7 +181,7 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
-    * @author Ana, Kieran
+    * @author Ana, Kieran, Monica
     * Se comprueba si se puede realizar la acción más prometedora
     */
     private Accion comprobarAccion(){
@@ -204,7 +208,7 @@ public class AgenteSimple extends SuperAgent{
 
       if(radar[x][y]==0)
           return logout;
-      else if(radar[x][y] <= gps.z) //No hay obstaculos y se puede realizar la acción más prometedora
+      else if(radar[x][y] <= gps.z && puedeSubir(accion)) //No hay obstaculos y se puede realizar la acción más prometedora
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z)) //Hay obstaculos y necesitamos superarlos
         return moveUP;
