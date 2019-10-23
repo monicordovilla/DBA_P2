@@ -97,56 +97,64 @@ public class AgenteSimple extends SuperAgent{
     private boolean puedeSubir(Accion sigAccion){
         boolean sube = true;
         max_z = 180;
-        
-        
+        int pos = 5;
+        System.out.println("Esto sale en pantalla\n");
         //si en la siguiente accion, la altura del drone es mayor es un obstáculo
         switch(sigAccion) {
             case moveNW:
-                if (radar[gps.x-1][gps.y+1] >= max_z){
+                if (radar[pos-1][pos+1] >= max_z){
                     sube = false;
                 }
                 break;
                 
             case moveN:
-                if (radar[gps.x][gps.y+1] >= max_z){
+                if (radar[pos][pos+1] >= max_z){
                     sube = false;
                 }
             break;
             
             case moveNE:
-                if (radar[gps.x+1][gps.y+1] >= max_z){
+                if (radar[pos+1][pos+1] >= max_z){
                     sube = false;
                 }
             break;
             
             case moveW:
-                if (radar[gps.x-1][gps.y] >= max_z){
+                if (radar[pos-1][pos] >= max_z){
                     sube = false;
                 }
             break;
             
             case moveE:
-                if (radar[gps.x+1][gps.y] >= max_z){
+                if (radar[pos+1][pos] >= max_z){
                     sube = false;
                 }
             break;
             
             case moveSW:
-                if (radar[gps.x-1][gps.y-1] >= max_z){
+                if (radar[pos-1][pos-1] >= max_z){
                     sube = false;
                 }
             break;
             
             case moveS:
-                if (radar[gps.x][gps.y-1] >= max_z){
+                if (radar[pos][pos-1] >= max_z){
                     sube = false;
                 }
             break;
             
             case moveSE:
-                if (radar[gps.x+1][gps.y-1] >= max_z){
+                if (radar[pos+1][pos-1] >= max_z){
                     sube = false;
                 }
+            break;
+            
+            case logout:
+                sube = false;
+            break;
+            
+            case refuel:
+                sube = false;
             break;
       }
         
@@ -178,6 +186,51 @@ public class AgenteSimple extends SuperAgent{
 
     }
 
+    /**
+    *
+    * @author Monica
+    */
+    private Accion rodearObstaculoAccion(){
+        int pos = 5;
+        
+        if(gonio.angulo>=22.5 && gonio.angulo<157.5){
+            if(radar[pos+2][pos+2] < max_z && puedeSubir(moveNE) && accion_anterior!= moveNE){
+                return moveNE;
+            }
+            if(radar[pos+2][pos] < max_z && puedeSubir(moveE) && accion_anterior!= moveE){
+                return moveE;
+            }
+            if(radar[pos+2][pos-2] < max_z && puedeSubir(moveSE) && accion_anterior!= moveSE){
+                return moveSE;
+            }
+            return moveE;
+        }
+        
+        if(gonio.angulo>=157.5 && gonio.angulo<292.5){
+            if(radar[pos][pos-2] < max_z && puedeSubir(moveS) && accion_anterior!= moveS){
+                return moveS;
+            }
+            if(radar[pos-2][pos-2] < max_z && puedeSubir(moveSW) && accion_anterior!= moveSW){
+                return moveSW;
+            }
+            if(radar[pos-2][pos] < max_z && puedeSubir(moveW) && accion_anterior!= moveW){
+                return moveW;
+            }
+            return moveW;
+        }
+        
+        if(gonio.angulo>=292.5 || gonio.angulo<22.5){
+            if(radar[pos-2][pos+2] < max_z && puedeSubir(moveNW) && accion_anterior!= moveNW){
+                return moveNW;
+            }
+            if(radar[pos][pos+2] < max_z  && puedeSubir(moveN) && accion_anterior!= moveN){
+                return moveN;
+            }
+            return moveN;
+        }
+        
+        return moveN;
+    }
 
     /**
     *
@@ -208,10 +261,13 @@ public class AgenteSimple extends SuperAgent{
 
       if(radar[x][y]==0)
           return logout;
-      else if(radar[x][y] <= gps.z && puedeSubir(accion)) //No hay obstaculos y se puede realizar la acción más prometedora
+      else if(radar[x][y] <= gps.z) //No hay obstaculos y se puede realizar la acción más prometedora
         return accion;
-      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z)) //Hay obstaculos y necesitamos superarlos
+      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //Hay obstaculos y podemos superarlos
         return moveUP;
+      else if(accion!= logout) { //rodeamos el obstaculo al no poder rodearlo
+        return rodearObstaculoAccion();
+        }
 
       return logout;
     }
@@ -364,7 +420,7 @@ public class AgenteSimple extends SuperAgent{
     * @author Kieran
     */
     private JsonObject escuchar(){
-        return escuchar(false);
+        return escuchar(true);
     }
     
     /**
