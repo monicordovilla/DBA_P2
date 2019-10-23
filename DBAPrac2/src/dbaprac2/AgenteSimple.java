@@ -50,10 +50,13 @@ public class AgenteSimple extends SuperAgent{
     Accion accion_anterior; //Acción anterior
     String clave;   //Clave que hay que enviar con cada comando que se envía
 
-    int min_x;
+    //dimensiones del mundo en el que se ha logueado, se asigna valor en el JSONDecode_Inicial
     int max_x;
-    int min_y;
     int max_y;
+    //ahora mismo no se usa, por si queremos evitar bordes
+    int min_x;
+    int min_y;
+    //altura mínima y máxima a las que el drone puede volar, se asigna valor en el JSONDecode_Inicial
     int min_z;
     int max_z;
 
@@ -86,6 +89,66 @@ public class AgenteSimple extends SuperAgent{
 
 //METODOS DE EVALUACIÓN: La funcionalidad inteligente del agente, para decidir que hacer
 
+    /**
+    *
+    * @author Monica
+    */
+    private boolean esObstaculo(Accion sigAccion){
+        boolean obstaculo = false;
+        
+        switch(sigAccion) {
+            case moveNW:
+                if (radar[gps.x-1][gps.y+1] >= max_z){
+                    obstaculo = true;
+                }
+                break;
+                
+            case moveN:
+                if (radar[gps.x][gps.y+1] >= max_z){
+                    obstaculo = true;
+                }
+            break;
+            
+            case moveNE:
+                if (radar[gps.x+1][gps.y+1] >= max_z){
+                    obstaculo = true;
+                }
+            break;
+            
+            case moveW:
+                if (radar[gps.x-1][gps.y] >= max_z){
+                    obstaculo = true;
+                }
+            break;
+            
+            case moveE:
+                if (radar[gps.x+1][gps.y] >= max_z){
+                    obstaculo = true;
+                }
+            break;
+            
+            case moveSW:
+                if (radar[gps.x-1][gps.y-1] >= max_z){
+                    obstaculo = true;
+                }
+            break;
+            
+            case moveS:
+                if (radar[gps.x][gps.y-1] >= max_z){
+                    obstaculo = true;
+                }
+            break;
+            
+            case moveSE:
+                if (radar[gps.x+1][gps.y-1] >= max_z){
+                    obstaculo = true;
+                }
+            break;
+      }
+        
+        return obstaculo;
+    }
+    
     /**
     *
     * @author Celia
@@ -364,7 +427,7 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
-    * @author Kieran, Ana, Celia
+    * @author Kieran, Ana, Celia, Monica
     */
     @Override
     public void execute() {
