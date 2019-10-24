@@ -167,7 +167,9 @@ public class AgenteSimple extends SuperAgent{
         int indice_menor = 999;
         for(int i = 0; i < 8; i++) {
             if(!validos[i]) continue;
-            if(gonio.angulo-(i*grados_entre_dir) < diff_menor){
+            float dist_real = Math.abs(gonio.angulo-(i*grados_entre_dir))%360;
+            dist_real = dist_real > 180 ? 360-dist_real : dist_real;
+            if(dist_real < diff_menor){
                 indice_menor = i;
                 diff_menor = gonio.angulo-(i*grados_entre_dir);
             }
