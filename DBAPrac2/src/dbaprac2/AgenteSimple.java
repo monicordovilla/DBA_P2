@@ -174,6 +174,9 @@ public class AgenteSimple extends SuperAgent{
                 diff_menor = gonio.angulo-(i*grados_entre_dir);
             }
         }
+        if(indice_menor == 999) return logout;
+        
+        return Accion.valueOfAccion(indice_menor);
     }
 
     /**

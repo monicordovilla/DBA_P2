@@ -18,10 +18,10 @@ public enum Accion {
     moveSW(5),
     moveS(4),
     moveSE(3),
-    moveUP,
-    moveDW,
-    refuel,
-    logout;
+    moveUP(10),
+    moveDW(11),
+    refuel(20),
+    logout(30);
     
     public final int value;
     private Accion(int value){
