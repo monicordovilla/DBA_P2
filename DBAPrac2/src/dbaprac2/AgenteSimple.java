@@ -48,6 +48,7 @@ public class AgenteSimple extends SuperAgent{
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
     Accion accion_anterior; //Acción anterior
+    int[][] memoria;
     String clave;   //Clave que hay que enviar con cada comando que se envía
 
     int min_x;
@@ -65,6 +66,7 @@ public class AgenteSimple extends SuperAgent{
         radar = new int[tamanio_radar][tamanio_radar];
         gonio = new Gonio();
         gps = new GPS();
+        memoria = new int[max_x][max_y];
         min_x = 0;
         min_y = 0;
         min_z = 0;
@@ -111,6 +113,32 @@ public class AgenteSimple extends SuperAgent{
 
     }
 
+    /**
+    *
+    * @author Ana
+    * Se comprueba si ya hemos pasado por la posición a la que nos lleva la siguiente acción
+    */
+    private boolean comprobarMemoria(Accion accion)
+    {
+      boolean moverse = true;
+      int x, y;
+
+      switch(accion) {
+        case moveNW: x = gps.x-1; y = gps.y+1; break; //Comprobación del movimiento NW
+        case moveN: x = gps.x; y = gps.y+1; break; //Comprobación del movimiento N
+        case moveNE: x = gps.x+1; y = gps.y+1; break; //Comprobación del movimiento NE
+        case moveW: x = gps.x-1; y = gps.y; break; //Comprobación del movimiento W
+        case moveE: x = gps.x+1; y = gps.y; break; //Comprobación del movimiento E
+        case moveSW: x = gps.x-1; y = gps.y-1; break; //Comprobación del movimiento SW
+        case moveS: x = gps.x; y = gps.y-1; break; //Comprobación del movimiento S
+        case moveSE: x = gps.x+1; y = gps.y-1; break; //Comprobación del movimiento SE
+      }
+
+      if(memoria[x][y] == 1)
+        moverse = false;
+
+        return moverse;
+    }
 
     /**
     *
@@ -118,8 +146,15 @@ public class AgenteSimple extends SuperAgent{
     * Se comprueba si se puede realizar la acción más prometedora
     */
     private Accion comprobarAccion(){
-      Accion accion = siguienteAccion();
+
       int x=5, y=5;
+      boolean intento = false;
+
+      while(!intento)
+      {
+        Accion accion = siguienteAccion();
+        intento = comprobarMemoria(accion);
+      }
 
       switch(accion) {
         case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
@@ -299,7 +334,7 @@ public class AgenteSimple extends SuperAgent{
     private JsonObject escuchar(){
         return escuchar(false);
     }
-    
+
     /**
     *
     * @author Kieran
@@ -333,7 +368,7 @@ public class AgenteSimple extends SuperAgent{
             guardarTraza(respuesta);
         }
     }
-    
+
     /**
     *
     * @author Kieran
@@ -386,6 +421,7 @@ public class AgenteSimple extends SuperAgent{
 
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
+            memoria[gps.x][gps.y] = 1; //Almacenamos la posición por la que pasa el agente
 
             System.out.println(command.toString());
 
