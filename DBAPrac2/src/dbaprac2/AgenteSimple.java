@@ -49,6 +49,7 @@ public class AgenteSimple extends SuperAgent{
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
     Accion accion_anterior; //Acción anterior
+    boolean[][] memoria;
     String clave;   //Clave que hay que enviar con cada comando que se envía
     
     boolean hecho_logout; //si se ha hecho 
@@ -166,8 +167,8 @@ public class AgenteSimple extends SuperAgent{
         
         boolean validos[] = {true,true,true,true,true,true,true,true};
         //System.out.println(accion_anterior.value);
-        for(int i = 0; i < dirs; i++) {
-            if(!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) validos[i] = false;
+        for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
+            if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) || !comprobarMemoria(Accion.valueOfAccion(i))) validos[i] = false;
         }
         //System.out.println(Arrays.toString(validos));
         float diff_menor = MAX;
@@ -191,6 +192,32 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
+    * @author Ana, Celia
+    * Se comprueba si ya hemos pasado por la posición a la que nos lleva la siguiente acción, devuelve TRUE si no se ha visitado ya
+    */
+    private boolean comprobarMemoria(Accion accion)
+    {
+      int x, y;
+
+      switch(accion) {
+        case moveNW: x = gps.x-1; y = gps.y-1; break; //Comprobación del movimiento NW
+        case moveN: x = gps.x-1; y = gps.y; break; //Comprobación del movimiento N
+        case moveNE: x = gps.x-1; y = gps.y+1; break; //Comprobación del movimiento NE
+        case moveW: x = gps.x; y = gps.y-1; break; //Comprobación del movimiento W
+        case moveE: x = gps.x; y = gps.y+1; break; //Comprobación del movimiento E
+        case moveSW: x = gps.x+1; y = gps.y-1; break; //Comprobación del movimiento SW
+        case moveS: x = gps.x+1; y = gps.y; break; //Comprobación del movimiento S
+        case moveSE: x = gps.x+1; y = gps.y+1; break; //Comprobación del movimiento SE
+        default: return true;
+      }
+      
+      if(x < 0 || y < 0 || x > max_x || y > max_y) return false; //Para no salirse de la matriz
+
+      return memoria[x][y] == false;
+    }
+
+    /**
+    *
     * @author Ana, Kieran, Monica
     * Se comprueba si se puede realizar la acción más prometedora
     */
@@ -206,7 +233,7 @@ public class AgenteSimple extends SuperAgent{
       
       accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
       int x=5, y=5;
-
+      
       switch(accion) {
         case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
         case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
@@ -318,6 +345,7 @@ public class AgenteSimple extends SuperAgent{
         min_z = mensaje.get("min").asInt();
         max_z = mensaje.get("max").asInt();
         clave = mensaje.get("key").asString();
+        memoria = new boolean[max_x][max_y]; //Arrays booleanos se inicializan a falso
     }
     /**
     *
@@ -378,7 +406,7 @@ public class AgenteSimple extends SuperAgent{
     private JsonObject escuchar(){
         return escuchar(true);
     }
-    
+
     /**
     *
     * @author Kieran
@@ -413,7 +441,7 @@ public class AgenteSimple extends SuperAgent{
             guardarTraza(respuesta);
         }
     }
-    
+
     /**
     *
     * @author Kieran
@@ -478,6 +506,7 @@ public class AgenteSimple extends SuperAgent{
             comunicar("Izar", mensaje);
             respuesta = escuchar(false);
             pasos++;
+            memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
             escuchar();
