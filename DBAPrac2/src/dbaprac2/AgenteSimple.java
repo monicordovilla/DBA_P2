@@ -146,7 +146,7 @@ public class AgenteSimple extends SuperAgent{
             
             
         if(radar[x][y] > max_z){
-                    sube = false;
+            sube = false;
         }
         
         return sube;
@@ -154,46 +154,24 @@ public class AgenteSimple extends SuperAgent{
     
     /**
     *
-    * @author Celia
+    * @author Celia, Monica, Kieran
+    * siguienteAccion renombrado
+    * Copiado-pegado de rodearObstaculoAccion, ya que este simplemente selecciona la mejor opcion sin contar los invalidos.
+    * Se ha de tener en cuenta de que rodearObstaculoAccion solo se lanza cuando supere la altura maxima asi que se han tenido que ajustar un par de cosas
     */
-    private Accion siguienteAccion(){
-        if(gonio.angulo>=22.5 && gonio.angulo<67.5)
-            return moveNE;
-        if(gonio.angulo>=67.5 && gonio.angulo<112.5)
-            return moveE;
-        if(gonio.angulo>=112.5 && gonio.angulo<157.5)
-            return moveSE;
-        if(gonio.angulo>=157.5 && gonio.angulo<202.5)
-            return moveS;
-        if(gonio.angulo>=202.5 && gonio.angulo<247.5)
-            return moveSW;
-        if(gonio.angulo>=247.5 && gonio.angulo<292.5)
-            return moveW;
-        if(gonio.angulo>=292.5 && gonio.angulo<337.5)
-            return moveNW;
-        if(gonio.angulo>=337.5 || gonio.angulo<22.5)
-            return moveN;
-        return logout;
-
-    }
-
-    /**
-    *
-    * @author Monica, Kieran
-    */
-    private Accion rodearObstaculoAccion(Accion accion){
+    private Accion siguienteDireccion(){
         final int dirs = 8;
+        final int MAX = 999;
         final float grados_entre_dir = 45;
         
         boolean validos[] = {true,true,true,true,true,true,true,true};
-        //validos[accion_anterior.value] = false;
-        System.out.println(accion_anterior.value);
+        //System.out.println(accion_anterior.value);
         for(int i = 0; i < dirs; i++) {
-            if(!puedeMover(Accion.valueOfAccion(i))) validos[i] = false;
+            if(!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) validos[i] = false;
         }
-        System.out.println(Arrays.toString(validos));
-        float diff_menor = 999;
-        int indice_menor = 999;
+        //System.out.println(Arrays.toString(validos));
+        float diff_menor = MAX;
+        int indice_menor = MAX;
         for(int i = 0; i < 8; i++) {
             if(!validos[i]) continue;
             float dist_real = Math.abs(gonio.angulo-(i*grados_entre_dir))%360;
@@ -206,7 +184,7 @@ public class AgenteSimple extends SuperAgent{
                 
             }
         }
-        if(indice_menor == 999) return logout;
+        if(indice_menor == MAX) return logout;
         
         return Accion.valueOfAccion(indice_menor);
     }
@@ -217,7 +195,16 @@ public class AgenteSimple extends SuperAgent{
     * Se comprueba si se puede realizar la acción más prometedora
     */
     private Accion comprobarAccion(){
-      Accion accion = siguienteAccion();
+      Accion accion;
+              
+      if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se necesita repostar o se ha llegado a la meta
+          if(gps.z == radar[5][5]){
+            return ((comprobarMeta())?logout:refuel);
+          }
+          return moveDW;
+      }
+      
+      accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
       int x=5, y=5;
 
       switch(accion) {
@@ -231,22 +218,12 @@ public class AgenteSimple extends SuperAgent{
         case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
       }
 
-      if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se puede repostar o se ha llegado a la meta
-          if(gps.z == radar[5][5]){
-            return ((comprobarMeta())?logout:refuel);
-          }
-          return moveDW;
-      }
-
-      if(radar[x][y]==0)
+      if(radar[x][y]==0) //Si la hemos liado, salir
           return logout;
-      else if(radar[x][y] <= gps.z) //No hay obstaculos y se puede realizar la acción más prometedora
+      else if(radar[x][y] <= gps.z) //Estamos a la altura de la celda a la que queremos ir o superor
         return accion;
-      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //Hay obstaculos y podemos superarlos
+      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //La celda a la que queremos ir esta a una altura superior y podemos llegar a ella
         return moveUP;
-      else if(accion != logout) { //rodeamos el obstaculo al no poder rodearlo
-        return rodearObstaculoAccion(accion);
-        }
 
       return logout;
     }
