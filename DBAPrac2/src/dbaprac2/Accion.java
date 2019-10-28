@@ -10,9 +10,9 @@ package dbaprac2;
  * @author Celia, Kieran
  */
 public enum Accion {
-    moveNW(1),
+    moveNW(7),
     moveN(0),
-    moveNE(7),
+    moveNE(1),
     moveW(6),
     moveE(2),
     moveSW(5),

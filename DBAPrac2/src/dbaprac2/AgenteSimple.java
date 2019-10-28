@@ -62,6 +62,7 @@ public class AgenteSimple extends SuperAgent{
     //altura mínima y máxima a las que el drone puede volar, se asigna valor en el JSONDecode_Inicial
     int min_z;
     int max_z;
+    int pasos = 0;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
@@ -125,7 +126,7 @@ public class AgenteSimple extends SuperAgent{
         //max_z = 180; //BORRAR DESPUES
         int x = 5;
         int y = 5;
-        System.out.println("Esto sale en pantalla\n");
+        //System.out.println("Esto sale en pantalla\n");
         //si en la siguiente accion, la altura del drone es mayor es un obstáculo
         
         if(sigAccion == moveDW || sigAccion == refuel || sigAccion == logout) {
@@ -185,11 +186,11 @@ public class AgenteSimple extends SuperAgent{
         final float grados_entre_dir = 45;
         
         boolean validos[] = {true,true,true,true,true,true,true,true};
-        validos[accion.value] = false;
+        validos[accion_anterior.value] = false;
         for(int i = 0; i < dirs; i++) {
             if(!puedeMover(Accion.valueOfAccion(i))) validos[i] = false;
         }
-        System.out.println(Arrays.toString(validos));
+        //System.out.println(Arrays.toString(validos));
         float diff_menor = 999;
         int indice_menor = 999;
         for(int i = 0; i < 8; i++) {
@@ -198,9 +199,9 @@ public class AgenteSimple extends SuperAgent{
             dist_real = dist_real > 180 ? 360-dist_real : dist_real;
             if(dist_real < diff_menor){
                 indice_menor = i;
-                diff_menor = gonio.angulo-(i*grados_entre_dir);
+                diff_menor = dist_real;
                 
-                System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
+                //System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
                 
             }
         }
@@ -482,21 +483,23 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar(true);
+            respuesta = escuchar(false);
             JSONDecode(respuesta);
 
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
-            System.out.println(command.toString());
+            //System.out.println(command.toString());
 
+            if(pasos > 350) command = logout;
             if(goal || command == logout){
                 break; //Hemos acabado
             }
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar(true);
+            respuesta = escuchar(false);
+            pasos++;
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
             escuchar();
