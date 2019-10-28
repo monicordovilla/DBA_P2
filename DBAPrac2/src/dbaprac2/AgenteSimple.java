@@ -98,6 +98,7 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Kieran
+    * Comprueba si se puede mover a la casilla a la que nos llevaria sigAccion
     */
     private boolean puedeMover(Accion sigAccion) {
         int x=5,y=5,z=0;
@@ -120,7 +121,7 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Monica, Kieran
-    * Comprueba si la siguiente accion a realizar es un obstaculo
+    * Comprueba si se puede subir por encima de la casilla a la que nos llevaría sigAccion
     */
     private boolean puedeSubir(Accion sigAccion){
         boolean sube = true;
@@ -129,11 +130,7 @@ public class AgenteSimple extends SuperAgent{
         int y = 5;
         //System.out.println("Esto sale en pantalla\n");
         //si en la siguiente accion, la altura del drone es mayor es un obstáculo
-        
-        if(sigAccion == moveDW || sigAccion == refuel || sigAccion == logout) {
-            return false;
-        }
-        
+                
         switch(sigAccion) {
             case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
             case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
@@ -156,7 +153,7 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Celia, Monica, Kieran
-    * siguienteAccion renombrado
+    * siguienteAccion() renombrado
     * Copiado-pegado de rodearObstaculoAccion, ya que este simplemente selecciona la mejor opcion sin contar los invalidos.
     * Se ha de tener en cuenta de que rodearObstaculoAccion solo se lanza cuando supere la altura maxima asi que se han tenido que ajustar un par de cosas
     */
