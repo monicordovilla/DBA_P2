@@ -16,6 +16,7 @@ import com.eclipsesource.json.JsonArray;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +50,8 @@ public class AgenteSimple extends SuperAgent{
     Accion command; //Siguiente accion que tiene que hacer el agente
     Accion accion_anterior; //Acción anterior
     String clave;   //Clave que hay que enviar con cada comando que se envía
+    
+    boolean hecho_logout; //si se ha hecho 
 
     //dimensiones del mundo en el que se ha logueado, se asigna valor en el JSONDecode_Inicial
     int max_x;
@@ -89,6 +92,29 @@ public class AgenteSimple extends SuperAgent{
 
 //METODOS DE EVALUACIÓN: La funcionalidad inteligente del agente, para decidir que hacer
 
+    
+    /**
+    *
+    * @author Kieran
+    */
+    private boolean puedeMover(Accion sigAccion) {
+        int x=5,y=5,z=0;
+        switch(sigAccion) {
+                case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
+                case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
+                case moveNE: x = 4; y = 6; break; //Comprobación del movimiento NE
+                case moveW: x = 5; y = 4; break; //Comprobación del movimiento W
+                case moveE: x = 5; y = 6; break; //Comprobación del movimiento E
+                case moveSW: x = 6; y = 4; break; //Comprobación del movimiento SW
+                case moveS: x = 6; y = 5; break;//Comprobación del movimiento S
+                case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
+                case moveDW: z = -5; break;
+                case moveUP: z = 5; break;
+              }
+        return(gps.z+z >= radar[x][y] && gps.z+z <= max_z);
+    }
+    
+    
     /**
     *
     * @author Monica, Kieran
@@ -96,7 +122,7 @@ public class AgenteSimple extends SuperAgent{
     */
     private boolean puedeSubir(Accion sigAccion){
         boolean sube = true;
-        max_z = 180;
+        //max_z = 180; //BORRAR DESPUES
         int x = 5;
         int y = 5;
         System.out.println("Esto sale en pantalla\n");
@@ -161,8 +187,9 @@ public class AgenteSimple extends SuperAgent{
         boolean validos[] = {true,true,true,true,true,true,true,true};
         validos[accion.value] = false;
         for(int i = 0; i < dirs; i++) {
-            if(puedeSubir(Accion.valueOfAccion(i))) validos[i] = false;
+            if(!puedeMover(Accion.valueOfAccion(i))) validos[i] = false;
         }
+        System.out.println(Arrays.toString(validos));
         float diff_menor = 999;
         int indice_menor = 999;
         for(int i = 0; i < 8; i++) {
@@ -172,6 +199,9 @@ public class AgenteSimple extends SuperAgent{
             if(dist_real < diff_menor){
                 indice_menor = i;
                 diff_menor = gonio.angulo-(i*grados_entre_dir);
+                
+                System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
+                
             }
         }
         if(indice_menor == 999) return logout;
@@ -212,7 +242,7 @@ public class AgenteSimple extends SuperAgent{
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //Hay obstaculos y podemos superarlos
         return moveUP;
-      else if(accion!= logout) { //rodeamos el obstaculo al no poder rodearlo
+      else if(accion != logout) { //rodeamos el obstaculo al no poder rodearlo
         return rodearObstaculoAccion(accion);
         }
 
@@ -393,6 +423,7 @@ public class AgenteSimple extends SuperAgent{
     * @author Kieran, Celia
     */
     private void logout() {
+        hecho_logout = true;
         command = logout;
         String mensaje = JSONEncode(); //codificar respuesta JSON aqui
         comunicar("Izar", mensaje);
@@ -467,6 +498,9 @@ public class AgenteSimple extends SuperAgent{
             comunicar("Izar", mensaje);
             respuesta = escuchar(true);
         }
+        if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
+            escuchar();
+        }
 
         logout();
     }
@@ -474,6 +508,7 @@ public class AgenteSimple extends SuperAgent{
     @Override
     public void finalize() { //Opcional
         System.out.println("\nFinalizando");
+        if(!hecho_logout) logout();
         super.finalize(); //Pero si se incluye, esto es obligatorio
     }
 }
