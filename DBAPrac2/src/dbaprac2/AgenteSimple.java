@@ -145,7 +145,7 @@ public class AgenteSimple extends SuperAgent{
           }
             
             
-        if(radar[x][y] >= max_z){
+        if(radar[x][y] > max_z){
                     sube = false;
         }
         
@@ -186,11 +186,12 @@ public class AgenteSimple extends SuperAgent{
         final float grados_entre_dir = 45;
         
         boolean validos[] = {true,true,true,true,true,true,true,true};
-        validos[accion_anterior.value] = false;
+        //validos[accion_anterior.value] = false;
+        System.out.println(accion_anterior.value);
         for(int i = 0; i < dirs; i++) {
             if(!puedeMover(Accion.valueOfAccion(i))) validos[i] = false;
         }
-        //System.out.println(Arrays.toString(validos));
+        System.out.println(Arrays.toString(validos));
         float diff_menor = 999;
         int indice_menor = 999;
         for(int i = 0; i < 8; i++) {
@@ -483,7 +484,7 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar(false);
+            respuesta = escuchar(true);
             JSONDecode(respuesta);
 
             accion_anterior = command;
