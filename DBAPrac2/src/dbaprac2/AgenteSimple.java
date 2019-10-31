@@ -273,6 +273,9 @@ public class AgenteSimple extends SuperAgent{
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //La celda a la que queremos ir esta a una altura superior y podemos llegar a ella
         return moveUP;
+      else if( !puedeLlegarMeta() ){
+          return logout;
+      }
 
       return logout;
     }
