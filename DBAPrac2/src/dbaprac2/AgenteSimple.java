@@ -170,7 +170,7 @@ public class AgenteSimple extends SuperAgent{
         //System.out.println(accion_anterior.value);
         for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
             if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) /*|| estaEnMemoria(Accion.valueOfAccion(i))*/) validos[i] = false;
-            if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
+            //if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
         }
         System.out.println(Arrays.toString(validos));
         float diff_menor = MAX;
