@@ -52,6 +52,8 @@ public class AgenteSimple extends SuperAgent{
     boolean[][] memoria;
     String clave;   //Clave que hay que enviar con cada comando que se envía
     
+    boolean modo_mano_dcha;
+    
     boolean hecho_logout; //si se ha hecho 
 
     //dimensiones del mundo en el que se ha logueado, se asigna valor en el JSONDecode_Inicial
@@ -80,6 +82,7 @@ public class AgenteSimple extends SuperAgent{
         max_z = 255;
         unidades_updown = 5;
         consumo_fuel = 0.5;
+        modo_mano_dcha = false;
     }
 
     /**
@@ -166,8 +169,8 @@ public class AgenteSimple extends SuperAgent{
         boolean validos[] = {true,true,true,true,true,true,true,true};
         //System.out.println(accion_anterior.value);
         for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
-            if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) || estaEnMemoria(Accion.valueOfAccion(i))) validos[i] = false;
-            //if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
+            if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) /*|| estaEnMemoria(Accion.valueOfAccion(i))*/) validos[i] = false;
+            if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
         }
         System.out.println(Arrays.toString(validos));
         float diff_menor = MAX;
@@ -231,6 +234,11 @@ public class AgenteSimple extends SuperAgent{
       }
       
       accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
+      if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == accion.value) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
+          modo_mano_dcha = true;
+          return reglaManoDerecha();
+      }
+      
       int x=5, y=5;
       
       switch(accion) {
@@ -252,6 +260,20 @@ public class AgenteSimple extends SuperAgent{
         return moveUP;
 
       return logout;
+    }
+    
+
+    /**
+    *
+    * @author Ana, Celia, Kieran
+    */
+    
+    private Accion reglaManoDerecha(){
+        //INSERTAR CODIGO AQUI
+        if(false) { //placeholder-cambiar por condicion de desactivación despues
+            modo_mano_derecha = false:
+        }
+        return moveDW; //placeholder - borrar ahora
     }
 
     /**
@@ -492,7 +514,8 @@ public class AgenteSimple extends SuperAgent{
             JSONDecode(respuesta);
 
             accion_anterior = command;
-            command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
+            if(modo_mano_dcha) command = reglaManoDerecha(); //REGLA DE MANO DERECHA
+            else command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
             //System.out.println(command.toString());
 
@@ -503,7 +526,7 @@ public class AgenteSimple extends SuperAgent{
             if(goal || command == logout){
                 break; //Hemos acabado
             }
-            System.out.println(memoria[gps.x][gps.y]);
+            
             memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
