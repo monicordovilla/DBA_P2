@@ -45,6 +45,7 @@ public class AgenteSimple extends SuperAgent{
     Gonio gonio;
     float fuel;
     int[][] radar;
+    int[][] magnetic;
     boolean goal;
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
@@ -94,7 +95,29 @@ public class AgenteSimple extends SuperAgent{
     }
 
 //METODOS DE EVALUACIÓN: La funcionalidad inteligente del agente, para decidir que hacer
-
+    
+    /**
+    *
+    * @author Monica, Pablo
+    * Comprueba si se puede mover a la casilla a la que nos llevaria sigAccion
+    */
+    private boolean puedeLlegarMeta() {
+        boolean puedeLlegar = true;
+        
+        if(gonio.distancia <= 5){
+            for(int i=0; i<magnetic.length; i++){
+                for(int j=0; j<magnetic.length; j++){
+                    if(magnetic[i][j] == 1){
+                        if( radar[i][j] >= max_z ){
+                            puedeLlegar = false;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return puedeLlegar;
+    }
     
     /**
     *
@@ -328,7 +351,13 @@ public class AgenteSimple extends SuperAgent{
                 radar[i][j] = vector_radar.get(j+i*radar.length).asInt();
             }
         }
-
+                
+        JsonArray vector_magnetic = a.get("magnetic").asArray();
+        for(int i=0; i<magnetic.length; i++){
+            for(int j=0; j<magnetic.length; j++){
+                magnetic[i][j] = vector_magnetic.get(j+i*magnetic.length).asInt();
+            }
+        }
 
         goal = a.get("goal").asBoolean();
         status = a.get("status").toString();
