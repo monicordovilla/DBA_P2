@@ -168,39 +168,84 @@ public class AgenteSimple extends SuperAgent{
     */
     private boolean necesitaRepostar(Accion accion){//Toma como parámtro la acción inmediatamente anterior, para comprobar la dirección a la que se dirige
         //Suponiendo que seguirá la dirección que tomo en el último movimiento, el agente comprueba si tiene combustible suficiente para repostar en cualquiera de los 5 puntos más próximos en esa dirección, si están demasiado altos o demasiado bajos no podrá repostar
-        boolean necesita=false;
+        boolean necesita=true;
+        int i,j;
         switch(accion) {
-        case moveNW: 
-            if (((fuel<=(6*consumo_fuel)+((gps.z-radar[0][0])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[0][0]-gps.z)*consumo_fuel))||(radar[0][0]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[1][1])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[1][1]-gps.z)*consumo_fuel))||(radar[1][1]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[2][2])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[2][2]-gps.z)*consumo_fuel))||(radar[2][2]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[3][3])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[3][3]-gps.z)*consumo_fuel))||(radar[3][3]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[4][4])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[4][4]-gps.z)*consumo_fuel))||(radar[4][4]>=max_z)));
-                necesita=true;
+        case moveNW:
+            i=0;
+            j=0;
+            while (necesita==true&&i<5){
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+                necesita=false;
+            ++i;
+            ++j;
+            }
             break; //Comprueba si podría repostar si continuase en dirección NW
         case moveN: 
-            if (((fuel<=(6*consumo_fuel)+((gps.z-radar[0][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[0][5]-gps.z)*consumo_fuel))||(radar[0][5]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[1][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[1][5]-gps.z)*consumo_fuel))||(radar[1][5]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[2][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[2][5]-gps.z)*consumo_fuel))||(radar[2][5]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[3][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[3][5]-gps.z)*consumo_fuel))||(radar[3][5]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[4][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[4][5]-gps.z)*consumo_fuel))||(radar[4][5]>=max_z)));
-                necesita=true;
+            i=0;
+            j=5;
+            while (necesita==true&&i<5){
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+                necesita=false;
+            ++i;
+            }
             break; //Comprueba si podría repostar si continuase en dirección N
         case moveNE: 
-            if (((fuel<=(6*consumo_fuel)+((gps.z-radar[0][10])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[0][10]-gps.z)*consumo_fuel))||(radar[0][10]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[1][9])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[1][9]-gps.z)*consumo_fuel))||(radar[1][9]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[2][8])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[2][8]-gps.z)*consumo_fuel))||(radar[2][8]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[3][7])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[3][7]-gps.z)*consumo_fuel))||(radar[3][7]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[4][6])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[4][6]-gps.z)*consumo_fuel))||(radar[4][6]>=max_z)));
-                necesita=true;
+            i=0;
+            j=10;
+            while (necesita==true&&i<5){
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+                necesita=false;
+            ++i;
+            --j;
+            }
             break; //Comprueba si podría repostar si continuase en dirección NE
         case moveW: 
-            if (((fuel<=(6*consumo_fuel)+((gps.z-radar[5][0])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][0]-gps.z)*consumo_fuel))||(radar[5][0]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[5][1])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][1]-gps.z)*consumo_fuel))||(radar[5][1]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[5][2])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][2]-gps.z)*consumo_fuel))||(radar[5][2]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[5][3])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][3]-gps.z)*consumo_fuel))||(radar[5][3]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[5][4])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][4]-gps.z)*consumo_fuel))||(radar[5][4]>=max_z)));
-                necesita=true;
+            i=5;
+            j=0;
+            while (necesita==true&&j<5){
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+                necesita=false;
+            ++j;
+            }
             break; //Comprueba si podría repostar si continuase en dirección W
         case moveE: 
-            if (((fuel<=(6*consumo_fuel)+((gps.z-radar[5][10])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][10]-gps.z)*consumo_fuel))||(radar[5][10]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[5][9])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][9]-gps.z)*consumo_fuel))||(radar[5][9]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[5][8])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][8]-gps.z)*consumo_fuel))||(radar[5][8]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[5][7])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][7]-gps.z)*consumo_fuel))||(radar[5][7]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[5][6])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[5][6]-gps.z)*consumo_fuel))||(radar[5][6]>=max_z)));
-                necesita=true;
+            i=5;
+            j=10;
+            while (necesita==true&&j>5){
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+                necesita=false;
+            --j;
+            }
             break; //Comprueba si podría repostar si continuase en dirección E
         case moveSW: 
-            if (((fuel<=(6*consumo_fuel)+((gps.z-radar[10][0])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[10][0]-gps.z)*consumo_fuel))||(radar[10][0]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[9][1])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[9][1]-gps.z)*consumo_fuel))||(radar[9][1]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[8][2])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[8][2]-gps.z)*consumo_fuel))||(radar[8][2]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[7][3])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[7][3]-gps.z)*consumo_fuel))||(radar[7][3]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[6][4])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[6][4]-gps.z)*consumo_fuel))||(radar[6][4]>=max_z)));
-                necesita=true;
+            i=10;
+            j=0;
+            while (necesita==true&&j<5){
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+                necesita=false;
+            --i;
+            ++j;
+            }
             break; //Comprueba si podría repostar si continuase en dirección SW
         case moveS: 
-            if (((fuel<=(6*consumo_fuel)+((gps.z-radar[10][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[10][5]-gps.z)*consumo_fuel))||(radar[10][5]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[9][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[9][5]-gps.z)*consumo_fuel))||(radar[9][5]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[8][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[8][5]-gps.z)*consumo_fuel))||(radar[8][5]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[7][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[7][5]-gps.z)*consumo_fuel))||(radar[7][5]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[6][5])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[6][5]-gps.z)*consumo_fuel))||(radar[6][5]>=max_z)));
-                necesita=true;
+            i=10;
+            j=5;
+            while (necesita==true&&i>5){
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+                necesita=false;
+            --i;
+            }
             break; //Comprueba si podría repostar si continuase en dirección S
         case moveSE: 
-            if (((fuel<=(6*consumo_fuel)+((gps.z-radar[10][10])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[10][10]-gps.z)*consumo_fuel))||(radar[10][10]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[9][9])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[9][9]-gps.z)*consumo_fuel))||(radar[9][9]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[8][8])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[8][8]-gps.z)*consumo_fuel))||(radar[8][8]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[7][7])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[7][7]-gps.z)*consumo_fuel))||(radar[7][7]>=max_z))&&((fuel<=(6*consumo_fuel)+((gps.z-radar[6][6])*consumo_fuel))||(fuel<=(6*consumo_fuel)+((radar[6][6]-gps.z)*consumo_fuel))||(radar[6][6]>=max_z)));
-                necesita=true;
+            i=10;
+            j=10;
+            while (necesita==true&&i<5){
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+                necesita=false;
+            --i;
+            --j;
+            }
             break; //Comprueba si podría repostar si continuase en dirección SE
       }
         if(fuel<=(unidadesBajada()*consumo_fuel)+consumo_fuel)necesita=false;//Aunque no tenga combustible suficiente para seguir avanzando, si no tiene suficiente para bajarm que siga hacia adelante
