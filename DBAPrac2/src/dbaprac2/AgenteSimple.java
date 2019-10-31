@@ -16,6 +16,7 @@ import com.eclipsesource.json.JsonArray;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,15 +49,22 @@ public class AgenteSimple extends SuperAgent{
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
     Accion accion_anterior; //Acción anterior
-    int[][] memoria;
+    boolean[][] memoria;
     String clave;   //Clave que hay que enviar con cada comando que se envía
+    
+    boolean hecho_logout; //si se ha hecho 
 
-    int min_x;
+    //dimensiones del mundo en el que se ha logueado, se asigna valor en el JSONDecode_Inicial
     int max_x;
-    int min_y;
     int max_y;
+    //ahora mismo no se usa, por si queremos evitar bordes
+    int min_x;
+    int min_y;
+    //altura mínima y máxima a las que el drone puede volar, se asigna valor en el JSONDecode_Inicial
     int min_z;
     int max_z;
+    int pasos = 0;
+    int max_pasos = 750;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
@@ -87,71 +95,144 @@ public class AgenteSimple extends SuperAgent{
 
 //METODOS DE EVALUACIÓN: La funcionalidad inteligente del agente, para decidir que hacer
 
+    
     /**
     *
-    * @author Celia
+    * @author Kieran
+    * Comprueba si se puede mover a la casilla a la que nos llevaria sigAccion
     */
-    private Accion siguienteAccion(){
-        if(gonio.angulo>=22.5 && gonio.angulo<67.5)
-            return moveNE;
-        if(gonio.angulo>=67.5 && gonio.angulo<112.5)
-            return moveE;
-        if(gonio.angulo>=112.5 && gonio.angulo<157.5)
-            return moveSE;
-        if(gonio.angulo>=157.5 && gonio.angulo<202.5)
-            return moveS;
-        if(gonio.angulo>=202.5 && gonio.angulo<247.5)
-            return moveSW;
-        if(gonio.angulo>=247.5 && gonio.angulo<292.5)
-            return moveW;
-        if(gonio.angulo>=292.5 && gonio.angulo<337.5)
-            return moveNW;
-        if(gonio.angulo>=337.5 || gonio.angulo<22.5)
-            return moveN;
-        return logout;
-
+    private boolean puedeMover(Accion sigAccion) {
+        int x=5,y=5,z=0;
+        switch(sigAccion) {
+                case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
+                case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
+                case moveNE: x = 4; y = 6; break; //Comprobación del movimiento NE
+                case moveW: x = 5; y = 4; break; //Comprobación del movimiento W
+                case moveE: x = 5; y = 6; break; //Comprobación del movimiento E
+                case moveSW: x = 6; y = 4; break; //Comprobación del movimiento SW
+                case moveS: x = 6; y = 5; break;//Comprobación del movimiento S
+                case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
+                case moveDW: z = -5; break;
+                case moveUP: z = 5; break;
+              }
+        return(gps.z+z >= radar[x][y] && gps.z+z <= max_z);
+    }
+    
+    
+    /**
+    *
+    * @author Monica, Kieran
+    * Comprueba si se puede subir por encima de la casilla a la que nos llevaría sigAccion
+    */
+    private boolean puedeSubir(Accion sigAccion){
+        boolean sube = true;
+        //max_z = 180; //BORRAR DESPUES
+        int x = 5;
+        int y = 5;
+        //System.out.println("Esto sale en pantalla\n");
+        //si en la siguiente accion, la altura del drone es mayor es un obstáculo
+                
+        switch(sigAccion) {
+            case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
+            case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
+            case moveNE: x = 4; y = 6; break; //Comprobación del movimiento NE
+            case moveW: x = 5; y = 4; break; //Comprobación del movimiento W
+            case moveE: x = 5; y = 6; break; //Comprobación del movimiento E
+            case moveSW: x = 6; y = 4; break; //Comprobación del movimiento SW
+            case moveS: x = 6; y = 5; break;//Comprobación del movimiento S
+            case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
+          }
+            
+            
+        if(radar[x][y] > max_z){
+            sube = false;
+        }
+        
+        return sube;
+    }
+    
+    /**
+    *
+    * @author Celia, Monica, Kieran
+    * siguienteAccion() renombrado
+    * Copiado-pegado de rodearObstaculoAccion, ya que este simplemente selecciona la mejor opcion sin contar los invalidos.
+    * Se ha de tener en cuenta de que rodearObstaculoAccion solo se lanza cuando supere la altura maxima asi que se han tenido que ajustar un par de cosas
+    */
+    private Accion siguienteDireccion(){
+        final int dirs = 8;
+        final int MAX = 999;
+        final float grados_entre_dir = 45;
+        
+        boolean validos[] = {true,true,true,true,true,true,true,true};
+        //System.out.println(accion_anterior.value);
+        for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
+            if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) || estaEnMemoria(Accion.valueOfAccion(i))) validos[i] = false;
+            //if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
+        }
+        System.out.println(Arrays.toString(validos));
+        float diff_menor = MAX;
+        int indice_menor = MAX;
+        for(int i = 0; i < 8; i++) {
+            if(!validos[i]) continue;
+            float dist_real = Math.abs(gonio.angulo-(i*grados_entre_dir))%360;
+            dist_real = dist_real > 180 ? 360-dist_real : dist_real;
+            if(dist_real < diff_menor){
+                indice_menor = i;
+                diff_menor = dist_real;
+                
+                System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
+                
+            }
+        }
+        if(indice_menor == MAX) return logout;
+        
+        return Accion.valueOfAccion(indice_menor);
     }
 
     /**
     *
     * @author Ana, Celia
-    * Se comprueba si ya hemos pasado por la posición a la que nos lleva la siguiente acción
+    * Se comprueba si ya hemos pasado por la posición a la que nos lleva la siguiente acción, devuelve TRUE si no se ha visitado ya
     */
-    private boolean comprobarMemoria(Accion accion)
+    private boolean estaEnMemoria(Accion accion)
     {
       int x, y;
 
       switch(accion) {
-        case moveNW: x = gps.x-1; y = gps.y-1; break; //Comprobación del movimiento NW
-        case moveN: x = gps.x-1; y = gps.y; break; //Comprobación del movimiento N
-        case moveNE: x = gps.x-1; y = gps.y+1; break; //Comprobación del movimiento NE
-        case moveW: x = gps.x; y = gps.y-1; break; //Comprobación del movimiento W
-        case moveE: x = gps.x; y = gps.y+1; break; //Comprobación del movimiento E
-        case moveSW: x = gps.x+1; y = gps.y-1; break; //Comprobación del movimiento SW
-        case moveS: x = gps.x+1; y = gps.y; break; //Comprobación del movimiento S
-        case moveSE: x = gps.x+1; y = gps.y+1; break; //Comprobación del movimiento SE
-        default: return true;
+        case moveNW: y = gps.y-1; x = gps.x-1; break; //Comprobación del movimiento NW
+        case moveN: y = gps.y-1; x = gps.x; break; //Comprobación del movimiento N
+        case moveNE: y = gps.y-1; x = gps.x+1; break; //Comprobación del movimiento NE
+        case moveW: y = gps.y; x = gps.x-1; break; //Comprobación del movimiento W
+        case moveE: y = gps.y; x = gps.x+1; break; //Comprobación del movimiento E
+        case moveSW: y = gps.y+1; x = gps.x-1; break; //Comprobación del movimiento SW
+        case moveS: y = gps.y+1; x = gps.x; break; //Comprobación del movimiento S
+        case moveSE: y = gps.y+1; x = gps.x+1; break; //Comprobación del movimiento SE
+        default: return false;
       }
+      
+      if(x < 0 || y < 0 || x > max_x || y > max_y) return true; //Para no salirse de la matriz
 
-      return memoria[x][y] != 1;
+      return memoria[x][y] == true;
     }
 
     /**
     *
-    * @author Ana, Kieran
+    * @author Ana, Kieran, Monica
     * Se comprueba si se puede realizar la acción más prometedora
     */
     private Accion comprobarAccion(){
-
-      int x=5, y=5;
-      boolean intento = false;
       Accion accion;
+              
+      if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se necesita repostar o se ha llegado a la meta
+          if(gps.z == radar[5][5]){
+            return ((comprobarMeta())?logout:refuel);
+          }
+          return moveDW;
+      }
       
-      //do{
-        accion = siguienteAccion();
-      //  intento = comprobarMemoria(accion);
-      //}while(!intento);
-
+      accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
+      int x=5, y=5;
+      
       switch(accion) {
         case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
         case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
@@ -163,18 +244,11 @@ public class AgenteSimple extends SuperAgent{
         case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
       }
 
-      if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se puede repostar o se ha llegado a la meta
-          if(gps.z == radar[5][5]){
-            return ((comprobarMeta())?logout:refuel);
-          }
-          return moveDW;
-      }
-
-      if(radar[x][y]==0)
+      if(radar[x][y]==0) //Si la hemos liado, salir
           return logout;
-      else if(radar[x][y] <= gps.z) //No hay obstaculos y se puede realizar la acción más prometedora
+      else if(radar[x][y] <= gps.z) //Estamos a la altura de la celda a la que queremos ir o superor
         return accion;
-      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z)) //Hay obstaculos y necesitamos superarlos
+      else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //La celda a la que queremos ir esta a una altura superior y podemos llegar a ella
         return moveUP;
 
       return logout;
@@ -270,7 +344,7 @@ public class AgenteSimple extends SuperAgent{
         min_z = mensaje.get("min").asInt();
         max_z = mensaje.get("max").asInt();
         clave = mensaje.get("key").asString();
-        memoria = new int[max_x][max_y];
+        memoria = new boolean[max_x][max_y]; //Arrays booleanos se inicializan a falso
     }
     /**
     *
@@ -329,7 +403,7 @@ public class AgenteSimple extends SuperAgent{
     * @author Kieran
     */
     private JsonObject escuchar(){
-        return escuchar(false);
+        return escuchar(true);
     }
 
     /**
@@ -355,6 +429,7 @@ public class AgenteSimple extends SuperAgent{
     * @author Kieran, Celia
     */
     private void logout() {
+        hecho_logout = true;
         command = logout;
         String mensaje = JSONEncode(); //codificar respuesta JSON aqui
         comunicar("Izar", mensaje);
@@ -396,7 +471,7 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
-    * @author Kieran, Ana, Celia
+    * @author Kieran, Ana, Celia, Monica
     */
     @Override
     public void execute() {
@@ -418,17 +493,26 @@ public class AgenteSimple extends SuperAgent{
 
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
-            //memoria[gps.x][gps.y] = 1; //Almacenamos la posición por la que pasa el agente
 
-            System.out.println(command.toString());
+            //System.out.println(command.toString());
 
+            if(pasos > max_pasos) {
+                command = logout;
+                System.out.println("Llegado a max_pasos pasos, haciendo logout:");
+            }
             if(goal || command == logout){
                 break; //Hemos acabado
             }
+            System.out.println(memoria[gps.x][gps.y]);
+            memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar(true);
+            respuesta = escuchar(false);
+            pasos++;
+        }
+        if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
+            escuchar();
         }
 
         logout();
@@ -437,6 +521,7 @@ public class AgenteSimple extends SuperAgent{
     @Override
     public void finalize() { //Opcional
         System.out.println("\nFinalizando");
+        if(!hecho_logout) logout();
         super.finalize(); //Pero si se incluye, esto es obligatorio
     }
 }
