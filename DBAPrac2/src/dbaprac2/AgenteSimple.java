@@ -175,7 +175,7 @@ public class AgenteSimple extends SuperAgent{
             i=0;
             j=0;
             while (necesita==true&&i<5){
-            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z))
                 necesita=false;
             ++i;
             ++j;
@@ -185,7 +185,7 @@ public class AgenteSimple extends SuperAgent{
             i=0;
             j=5;
             while (necesita==true&&i<5){
-            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z))
                 necesita=false;
             ++i;
             }
@@ -194,7 +194,7 @@ public class AgenteSimple extends SuperAgent{
             i=0;
             j=10;
             while (necesita==true&&i<5){
-            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z))
                 necesita=false;
             ++i;
             --j;
@@ -204,7 +204,7 @@ public class AgenteSimple extends SuperAgent{
             i=5;
             j=0;
             while (necesita==true&&j<5){
-            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z))
                 necesita=false;
             ++j;
             }
@@ -213,7 +213,7 @@ public class AgenteSimple extends SuperAgent{
             i=5;
             j=10;
             while (necesita==true&&j>5){
-            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z))
                 necesita=false;
             --j;
             }
@@ -222,7 +222,7 @@ public class AgenteSimple extends SuperAgent{
             i=10;
             j=0;
             while (necesita==true&&j<5){
-            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z))
                 necesita=false;
             --i;
             ++j;
@@ -232,7 +232,7 @@ public class AgenteSimple extends SuperAgent{
             i=10;
             j=5;
             while (necesita==true&&i>5){
-            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z))
                 necesita=false;
             --i;
             }
@@ -241,7 +241,7 @@ public class AgenteSimple extends SuperAgent{
             i=10;
             j=10;
             while (necesita==true&&i<5){
-            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z));
+            if (((fuel>(6*consumo_fuel)+((gps.z-radar[i][j])*consumo_fuel))||(fuel>(6*consumo_fuel)+((radar[i][j]-gps.z)*consumo_fuel)))&&(radar[i][j]>=max_z))
                 necesita=false;
             --i;
             --j;
