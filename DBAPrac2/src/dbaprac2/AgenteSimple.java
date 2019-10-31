@@ -64,6 +64,7 @@ public class AgenteSimple extends SuperAgent{
     int min_z;
     int max_z;
     int pasos = 0;
+    int max_pasos = 750;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
@@ -165,9 +166,10 @@ public class AgenteSimple extends SuperAgent{
         boolean validos[] = {true,true,true,true,true,true,true,true};
         //System.out.println(accion_anterior.value);
         for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
-            if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) || !comprobarMemoria(Accion.valueOfAccion(i))) validos[i] = false;
+            if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) || estaEnMemoria(Accion.valueOfAccion(i))) validos[i] = false;
+            //if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
         }
-        //System.out.println(Arrays.toString(validos));
+        System.out.println(Arrays.toString(validos));
         float diff_menor = MAX;
         int indice_menor = MAX;
         for(int i = 0; i < 8; i++) {
@@ -178,7 +180,7 @@ public class AgenteSimple extends SuperAgent{
                 indice_menor = i;
                 diff_menor = dist_real;
                 
-                //System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
+                System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
                 
             }
         }
@@ -192,25 +194,25 @@ public class AgenteSimple extends SuperAgent{
     * @author Ana, Celia
     * Se comprueba si ya hemos pasado por la posición a la que nos lleva la siguiente acción, devuelve TRUE si no se ha visitado ya
     */
-    private boolean comprobarMemoria(Accion accion)
+    private boolean estaEnMemoria(Accion accion)
     {
       int x, y;
 
       switch(accion) {
-        case moveNW: x = gps.x-1; y = gps.y-1; break; //Comprobación del movimiento NW
-        case moveN: x = gps.x-1; y = gps.y; break; //Comprobación del movimiento N
-        case moveNE: x = gps.x-1; y = gps.y+1; break; //Comprobación del movimiento NE
-        case moveW: x = gps.x; y = gps.y-1; break; //Comprobación del movimiento W
-        case moveE: x = gps.x; y = gps.y+1; break; //Comprobación del movimiento E
-        case moveSW: x = gps.x+1; y = gps.y-1; break; //Comprobación del movimiento SW
-        case moveS: x = gps.x+1; y = gps.y; break; //Comprobación del movimiento S
-        case moveSE: x = gps.x+1; y = gps.y+1; break; //Comprobación del movimiento SE
-        default: return true;
+        case moveNW: y = gps.y-1; x = gps.x-1; break; //Comprobación del movimiento NW
+        case moveN: y = gps.y-1; x = gps.x; break; //Comprobación del movimiento N
+        case moveNE: y = gps.y-1; x = gps.x+1; break; //Comprobación del movimiento NE
+        case moveW: y = gps.y; x = gps.x-1; break; //Comprobación del movimiento W
+        case moveE: y = gps.y; x = gps.x+1; break; //Comprobación del movimiento E
+        case moveSW: y = gps.y+1; x = gps.x-1; break; //Comprobación del movimiento SW
+        case moveS: y = gps.y+1; x = gps.x; break; //Comprobación del movimiento S
+        case moveSE: y = gps.y+1; x = gps.x+1; break; //Comprobación del movimiento SE
+        default: return false;
       }
       
-      if(x < 0 || y < 0 || x > max_x || y > max_y) return false; //Para no salirse de la matriz
+      if(x < 0 || y < 0 || x > max_x || y > max_y) return true; //Para no salirse de la matriz
 
-      return memoria[x][y] == false;
+      return memoria[x][y] == true;
     }
 
     /**
@@ -494,16 +496,20 @@ public class AgenteSimple extends SuperAgent{
 
             //System.out.println(command.toString());
 
-            if(pasos > 350) command = logout;
+            if(pasos > max_pasos) {
+                command = logout;
+                System.out.println("Llegado a max_pasos pasos, haciendo logout:");
+            }
             if(goal || command == logout){
                 break; //Hemos acabado
             }
+            System.out.println(memoria[gps.x][gps.y]);
+            memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
             respuesta = escuchar(false);
             pasos++;
-            memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
             escuchar();
