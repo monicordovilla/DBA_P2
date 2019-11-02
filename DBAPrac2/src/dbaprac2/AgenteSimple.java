@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,8 +53,6 @@ public class AgenteSimple extends SuperAgent{
     boolean[][] memoria;
     String clave;   //Clave que hay que enviar con cada comando que se envía
     
-    boolean modo_mano_dcha;
-    
     boolean hecho_logout; //si se ha hecho 
 
     //dimensiones del mundo en el que se ha logueado, se asigna valor en el JSONDecode_Inicial
@@ -70,9 +69,12 @@ public class AgenteSimple extends SuperAgent{
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
+    Stack<Accion> mano_dcha; //Pila con las direcciones a las que desea moverse
+    
 
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
+        mano_dcha = new Stack<>();
         radar = new int[tamanio_radar][tamanio_radar];
         gonio = new Gonio();
         gps = new GPS();
@@ -82,7 +84,6 @@ public class AgenteSimple extends SuperAgent{
         max_z = 255;
         unidades_updown = 5;
         consumo_fuel = 0.5;
-        modo_mano_dcha = false;
     }
 
     /**
@@ -234,8 +235,8 @@ public class AgenteSimple extends SuperAgent{
       }
       
       accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
-      if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == accion.value) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
-          modo_mano_dcha = true;
+      if((accion_anterior.value < 8 && (accion_anterior.value+4)%8 == accion.value)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
+          mano_dcha.push(mejorDireccion());
           return reglaManoDerecha();
       }
       
@@ -262,17 +263,54 @@ public class AgenteSimple extends SuperAgent{
       return logout;
     }
     
+    /**
+    *
+    * @author Celia
+    */
+    private Accion mejorDireccion(){
+        if(gonio.angulo>=22.5 && gonio.angulo<67.5)
+            return moveNE;
+        if(gonio.angulo>=67.5 && gonio.angulo<112.5)
+            return moveE;
+        if(gonio.angulo>=112.5 && gonio.angulo<157.5)
+            return moveSE;
+        if(gonio.angulo>=157.5 && gonio.angulo<202.5)
+            return moveS;
+        if(gonio.angulo>=202.5 && gonio.angulo<247.5)
+            return moveSW;
+        if(gonio.angulo>=247.5 && gonio.angulo<292.5)
+            return moveW;
+        if(gonio.angulo>=292.5 && gonio.angulo<337.5)
+            return moveNW;
+        return moveN;
+
+    } 
 
     /**
     *
-    * @author Ana, Celia, Kieran
+    * @author Celia
     */
     
     private Accion reglaManoDerecha(){
-        //INSERTAR CODIGO AQUI
-        if(false) { //placeholder-cambiar por condicion de desactivación despues
-            modo_mano_derecha = false:
+        
+        int enCola = mano_dcha.peek().value; //Obtener valor de la primera accion en cola
+        Accion siguiente;
+        boolean pasado=false;
+        for(int i=0; i<8; i++){
+            siguiente = valueOfAccion((enCola-i)%8);
+            
+            if(siguiente.value==accion_anterior.value) 
+                pasado=true;
+                
+            if(puedeMover(siguiente)){
+                if(siguiente.value ==enCola)
+                    mano_dcha.pop();
+                else if(siguiente.value!=accion_anterior.value && pasado)
+                    mano_dcha.push(siguiente);
+                return siguiente;
+            }
         }
+                
         return moveDW; //placeholder - borrar ahora
     }
 
@@ -514,7 +552,7 @@ public class AgenteSimple extends SuperAgent{
             JSONDecode(respuesta);
 
             accion_anterior = command;
-            if(modo_mano_dcha) command = reglaManoDerecha(); //REGLA DE MANO DERECHA
+            if(!mano_dcha.empty()) command = reglaManoDerecha(); //REGLA DE MANO DERECHA
             else command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
             //System.out.println(command.toString());
