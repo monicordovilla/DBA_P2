@@ -65,7 +65,7 @@ public class AgenteSimple extends SuperAgent{
     int min_z;
     int max_z;
     int pasos = 0;
-    int max_pasos = 750;
+    int max_pasos = 1500;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
@@ -119,7 +119,8 @@ public class AgenteSimple extends SuperAgent{
                 case moveDW: z = -5; break;
                 case moveUP: z = 5; break;
               }
-        return(gps.z+z >= radar[x][y] && gps.z+z <= max_z);
+ 
+        return(gps.z+z >= radar[x][y] && radar[x][y] >= min_z && gps.z+z <= max_z);
     }
     
     
@@ -147,8 +148,7 @@ public class AgenteSimple extends SuperAgent{
             case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
           }
             
-            
-        if(radar[x][y] > max_z){
+        if(radar[x][y] > max_z || radar[x][y] < min_z){
             sube = false;
         }
         
@@ -239,9 +239,11 @@ public class AgenteSimple extends SuperAgent{
           return moveDW;
       }
       
+      if(!mano_dcha.empty()) { accion = reglaManoDerecha(); /*System.out.println(mano_dcha.toString());*/ return accion; } //REGLA DE MANO DERECHA
+      
       accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
       if(accion_anterior != null && (accion_anterior.value < 8 && (accion_anterior.value+4)%8 == accion.value)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
-          System.out.println("beep");
+          //System.out.println("mano dcha");
           mano_dcha.push(siguienteDireccion(false));
           accion = reglaManoDerecha();
       }
@@ -280,18 +282,18 @@ public class AgenteSimple extends SuperAgent{
         int enCola = mano_dcha.peek().value; //Obtener valor de la primera accion en cola
         Accion siguiente;
         boolean pasado=false;
-      System.out.println("beep");
+//      System.out.println("beep");
         for(int i=0; i<8; i++){
             
-              System.out.println((8+enCola-i)%8);
+  //            System.out.println((8+enCola-i)%8);
             siguiente = valueOfAccion((8+enCola-i)%8); //+8 para evitar modulos negativos
             
-             System.out.println("beep" + i);
+    //         System.out.println("beep" + i);
             if(siguiente.value==accion_anterior.value) 
                 pasado=true;
                 
-            if(puedeMover(siguiente)){
-                  System.out.println("beep butta return");
+            if(puedeMover(siguiente) /*|| puedeSubir(siguiente)*/){
+      //            System.out.println("beep butta return");
                 if(siguiente.value == enCola)
                     mano_dcha.pop();
                 else if(siguiente.value!=accion_anterior.value && pasado)
@@ -537,14 +539,13 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar(true);
+            respuesta = escuchar(false);
             JSONDecode(respuesta);
 
             accion_anterior = command;
-            if(!mano_dcha.empty()) { command = reglaManoDerecha(); System.out.println(mano_dcha.toString());} //REGLA DE MANO DERECHA
-            else command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
+            command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
-            System.out.println(command.toString());
+            //System.out.println(command.toString());
 
             if(pasos > max_pasos) {
                 command = logout;
@@ -558,7 +559,7 @@ public class AgenteSimple extends SuperAgent{
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar(true);
+            respuesta = escuchar(false);
             pasos++;
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
