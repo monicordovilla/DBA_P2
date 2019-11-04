@@ -161,19 +161,24 @@ public class AgenteSimple extends SuperAgent{
     * siguienteAccion() renombrado
     * Copiado-pegado de rodearObstaculoAccion, ya que este simplemente selecciona la mejor opcion sin contar los invalidos.
     * Se ha de tener en cuenta de que rodearObstaculoAccion solo se lanza cuando supere la altura maxima asi que se han tenido que ajustar un par de cosas
+    * Si se pasa false como parametro, solo miria la direccion y no comprueba la validez
     */
-    private Accion siguienteDireccion(){
+    private Accion siguienteDireccion(){ return siguienteDireccion(true); }
+    
+    private Accion siguienteDireccion(boolean comprobar_validez){
         final int dirs = 8;
         final int MAX = 999;
         final float grados_entre_dir = 45;
         
         boolean validos[] = {true,true,true,true,true,true,true,true};
         //System.out.println(accion_anterior.value);
-        for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
-            if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) /*|| estaEnMemoria(Accion.valueOfAccion(i))*/) validos[i] = false;
-            //if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
+        if(comprobar_validez) {
+            for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
+                if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) /*|| estaEnMemoria(Accion.valueOfAccion(i))*/) validos[i] = false;
+                //if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
+            }
+            //System.out.println(Arrays.toString(validos));
         }
-        System.out.println(Arrays.toString(validos));
         float diff_menor = MAX;
         int indice_menor = MAX;
         for(int i = 0; i < 8; i++) {
@@ -184,7 +189,7 @@ public class AgenteSimple extends SuperAgent{
                 indice_menor = i;
                 diff_menor = dist_real;
                 
-                System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
+                //System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
                 
             }
         }
@@ -235,9 +240,10 @@ public class AgenteSimple extends SuperAgent{
       }
       
       accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
-      if((accion_anterior.value < 8 && (accion_anterior.value+4)%8 == accion.value)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
-          mano_dcha.push(mejorDireccion());
-          return reglaManoDerecha();
+      if(accion_anterior != null && (accion_anterior.value < 8 && (accion_anterior.value+4)%8 == accion.value)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
+          System.out.println("beep");
+          mano_dcha.push(siguienteDireccion(false));
+          accion = reglaManoDerecha();
       }
       
       int x=5, y=5;
@@ -263,28 +269,6 @@ public class AgenteSimple extends SuperAgent{
       return logout;
     }
     
-    /**
-    *
-    * @author Celia
-    */
-    private Accion mejorDireccion(){
-        if(gonio.angulo>=22.5 && gonio.angulo<67.5)
-            return moveNE;
-        if(gonio.angulo>=67.5 && gonio.angulo<112.5)
-            return moveE;
-        if(gonio.angulo>=112.5 && gonio.angulo<157.5)
-            return moveSE;
-        if(gonio.angulo>=157.5 && gonio.angulo<202.5)
-            return moveS;
-        if(gonio.angulo>=202.5 && gonio.angulo<247.5)
-            return moveSW;
-        if(gonio.angulo>=247.5 && gonio.angulo<292.5)
-            return moveW;
-        if(gonio.angulo>=292.5 && gonio.angulo<337.5)
-            return moveNW;
-        return moveN;
-
-    } 
 
     /**
     *
@@ -296,17 +280,22 @@ public class AgenteSimple extends SuperAgent{
         int enCola = mano_dcha.peek().value; //Obtener valor de la primera accion en cola
         Accion siguiente;
         boolean pasado=false;
+      System.out.println("beep");
         for(int i=0; i<8; i++){
-            siguiente = valueOfAccion((enCola-i)%8);
             
+              System.out.println((8+enCola-i)%8);
+            siguiente = valueOfAccion((8+enCola-i)%8); //+8 para evitar modulos negativos
+            
+             System.out.println("beep" + i);
             if(siguiente.value==accion_anterior.value) 
                 pasado=true;
                 
             if(puedeMover(siguiente)){
-                if(siguiente.value ==enCola)
+                  System.out.println("beep butta return");
+                if(siguiente.value == enCola)
                     mano_dcha.pop();
                 else if(siguiente.value!=accion_anterior.value && pasado)
-                    mano_dcha.push(siguiente);
+                    mano_dcha.push(accion_anterior);
                 return siguiente;
             }
         }
@@ -552,10 +541,10 @@ public class AgenteSimple extends SuperAgent{
             JSONDecode(respuesta);
 
             accion_anterior = command;
-            if(!mano_dcha.empty()) command = reglaManoDerecha(); //REGLA DE MANO DERECHA
+            if(!mano_dcha.empty()) { command = reglaManoDerecha(); System.out.println(mano_dcha.toString());} //REGLA DE MANO DERECHA
             else command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
-            //System.out.println(command.toString());
+            System.out.println(command.toString());
 
             if(pasos > max_pasos) {
                 command = logout;
@@ -569,7 +558,7 @@ public class AgenteSimple extends SuperAgent{
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar(false);
+            respuesta = escuchar(true);
             pasos++;
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
