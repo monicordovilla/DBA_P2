@@ -65,7 +65,7 @@ public class AgenteSimple extends SuperAgent{
     int min_z;
     int max_z;
     int pasos = 0;
-    int max_pasos = 1500;
+    int max_pasos = 3000;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
@@ -107,6 +107,7 @@ public class AgenteSimple extends SuperAgent{
     */
     private boolean puedeMover(Accion sigAccion) {
         int x=5,y=5,z=0;
+        
         switch(sigAccion) {
                 case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
                 case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
@@ -157,7 +158,7 @@ public class AgenteSimple extends SuperAgent{
     
     /**
     *
-    * @author Celia, Monica, Kieran
+    * @author Monica, Kieran
     * siguienteAccion() renombrado
     * Copiado-pegado de rodearObstaculoAccion, ya que este simplemente selecciona la mejor opcion sin contar los invalidos.
     * Se ha de tener en cuenta de que rodearObstaculoAccion solo se lanza cuando supere la altura maxima asi que se han tenido que ajustar un par de cosas
@@ -239,13 +240,17 @@ public class AgenteSimple extends SuperAgent{
           return moveDW;
       }
       
-      if(!mano_dcha.empty()) { accion = reglaManoDerecha(); /*System.out.println(mano_dcha.toString());*/ return accion; } //REGLA DE MANO DERECHA
-      
-      accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
-      if(accion_anterior != null && (accion_anterior.value < 8 && (accion_anterior.value+4)%8 == accion.value)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
+            
+      if(!mano_dcha.empty()) { 
+          accion = reglaManoDerecha(); 
+        /*System.out.println(mano_dcha.toString());*/
+      } //REGLA DE MANO DERECHA
+      else
+          accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
+      if(accion_anterior != null && accion_anterior.value < 8 && !puedeMover(accion_anterior)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
           //System.out.println("mano dcha");
           mano_dcha.push(siguienteDireccion(false));
-          accion = reglaManoDerecha();
+          return reglaManoDerecha();
       }
       
       int x=5, y=5;
@@ -284,7 +289,6 @@ public class AgenteSimple extends SuperAgent{
         boolean pasado=false;
 //      System.out.println("beep");
         for(int i=0; i<8; i++){
-            
   //            System.out.println((8+enCola-i)%8);
             siguiente = valueOfAccion((8+enCola-i)%8); //+8 para evitar modulos negativos
             
@@ -292,14 +296,16 @@ public class AgenteSimple extends SuperAgent{
             if(siguiente.value==accion_anterior.value) 
                 pasado=true;
                 
-            if(puedeMover(siguiente) /*|| puedeSubir(siguiente)*/){
-      //            System.out.println("beep butta return");
+            if(puedeMover(siguiente)){
+      //           System.out.println("beep butta return");
                 if(siguiente.value == enCola)
                     mano_dcha.pop();
                 else if(siguiente.value!=accion_anterior.value && pasado)
                     mano_dcha.push(accion_anterior);
                 return siguiente;
             }
+            else if(puedeSubir(siguiente))
+                return moveUP;
         }
                 
         return moveDW; //placeholder - borrar ahora
