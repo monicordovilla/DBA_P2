@@ -51,7 +51,7 @@ public class AgenteSimple extends SuperAgent{
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
     Accion accion_anterior; //Acción anterior
-    boolean[][] memoria;
+    int[][] memoria;
     String clave;   //Clave que hay que enviar con cada comando que se envía
     
     boolean hecho_logout; //si se ha hecho 
@@ -103,7 +103,7 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Monica, Pablo
-    * Comprueba si se puede mover a la casilla a la que nos llevaria sigAccion
+    * Comprueba si se puede llegar la meta
     */
     private boolean puedeLlegarMeta() {
         boolean puedeLlegar = true;
@@ -245,7 +245,7 @@ public class AgenteSimple extends SuperAgent{
       
       if(x < 0 || y < 0 || x > max_x || y > max_y) return true; //Para no salirse de la matriz
 
-      return memoria[x][y] == true;
+      return (memoria[x][y] > 0);
     }
 
     /**
@@ -433,7 +433,7 @@ public class AgenteSimple extends SuperAgent{
         min_z = mensaje.get("min").asInt();
         max_z = mensaje.get("max").asInt();
         clave = mensaje.get("key").asString();
-        memoria = new boolean[max_x][max_y]; //Arrays booleanos se inicializan a falso
+        memoria = new int[max_x][max_y]; //Arrays int se inicializan a 0
     }
     /**
     *
