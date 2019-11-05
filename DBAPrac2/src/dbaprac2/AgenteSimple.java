@@ -51,7 +51,7 @@ public class AgenteSimple extends SuperAgent{
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
     Accion accion_anterior; //Acción anterior
-    int[][] memoria;
+    boolean[][] memoria;
     String clave;   //Clave que hay que enviar con cada comando que se envía
     
     boolean hecho_logout; //si se ha hecho 
@@ -66,7 +66,9 @@ public class AgenteSimple extends SuperAgent{
     int min_z;
     int max_z;
     int pasos = 0;
+    int pasos_repetidos = 0;
     int max_pasos = 3000;
+    int max_pasos_repetidos = 10;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
@@ -223,7 +225,7 @@ public class AgenteSimple extends SuperAgent{
       
       if(x < 0 || y < 0 || x > max_x || y > max_y) return true; //Para no salirse de la matriz
 
-      return (memoria[x][y] > 0);
+      return (memoria[x][y] == true);
     }
 
     /**
@@ -273,7 +275,7 @@ public class AgenteSimple extends SuperAgent{
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //La celda a la que queremos ir esta a una altura superior y podemos llegar a ella
         return moveUP;
-      else if( metaDemasiadoAlta() ){
+      else if( gameOver_metaDemasiadoAlta() ){
           return logout;
       }
 
@@ -342,12 +344,14 @@ public class AgenteSimple extends SuperAgent{
         return gonio.distancia<=1;
     }
     
+    
+//METODOS DE GAME OVER: Comprueba por que no puede realizar un mapa
     /**
     *
     * @author Monica, Pablo
     * Comprueba si se puede llegar la meta
     */
-    private boolean metaDemasiadoAlta() {
+    private boolean gameOver_metaDemasiadoAlta() {
         boolean puedeLlegar = false;
         
         if(gonio.distancia > 6) { return true; }
@@ -375,12 +379,19 @@ public class AgenteSimple extends SuperAgent{
     *
     * @author Monica
     * Comprueba si el agente está dando vueltas en circulo por que no puede llegar
-    * Si pasa mas de 2 veces por el mismo sitio es por que está dando vueltas al no poder llegar a la meta
+    * Si repite demasiadas veces los movimientos es que esta en bucle
     */
-    private boolean bucleInfinito() {
+    private boolean gameOver_bucleInfinito() {
         boolean  haPasado= false;
         
-        if(memoria [gps.x][gps.y] > 2 ){
+        if(memoria[gps.x][gps.y] == true){
+            pasos_repetidos++;
+        }
+        else{
+            pasos_repetidos = 0;
+        }
+        
+        if(pasos_repetidos >= max_pasos_repetidos){
             haPasado = true;
         }
         
@@ -458,7 +469,7 @@ public class AgenteSimple extends SuperAgent{
         clave = mensaje.get("key").asString();
         
         //Se inicializa ahora ya que es cuando recibimos las medidas del mapa
-        memoria = new int[max_x][max_y]; //Arrays int se inicializan a 0
+        memoria = new boolean[max_x][max_y]; //Arrays int se inicializan a 0
     }
     /**
     *
@@ -605,11 +616,6 @@ public class AgenteSimple extends SuperAgent{
             respuesta = escuchar(true);
             JSONDecode(respuesta);
             
-            if(bucleInfinito()) {
-                System.out.println("Detectado un bucle con la mano derecha activada. Es probable que el objetivo sea inalcanzable. Terminando ejecución.");
-                break; //salimos
-            }
-
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
@@ -623,8 +629,13 @@ public class AgenteSimple extends SuperAgent{
                 break; //Hemos acabado
             }
             
+            if(gameOver_bucleInfinito()) {
+                System.out.println("Detectado un bucle con la mano derecha activada. Es probable que el objetivo sea inalcanzable. Terminando ejecución.");
+                break; //salimos
+            }
+            
             if( !(command == refuel ||  command == moveDW || command == moveUP)  ){
-                memoria[gps.x][gps.y]++; //Almacenamos la posición por la que pasa el agente
+                memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
             }
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
