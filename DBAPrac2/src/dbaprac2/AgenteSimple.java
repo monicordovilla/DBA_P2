@@ -102,29 +102,6 @@ public class AgenteSimple extends SuperAgent{
     
     /**
     *
-    * @author Monica, Pablo
-    * Comprueba si se puede llegar la meta
-    */
-    private boolean puedeLlegarMeta() {
-        boolean puedeLlegar = true;
-        
-        if(gonio.distancia <= 5){
-            for(int i=0; i<magnetic.length; i++){
-                for(int j=0; j<magnetic.length; j++){
-                    if(magnetic[i][j] == 1){
-                        if( radar[i][j] >= max_z ){
-                            puedeLlegar = false;
-                        }
-                    }
-                }
-            }
-        }
-        
-        return puedeLlegar;
-    }
-    
-    /**
-    *
     * @author Kieran
     * Comprueba si se puede mover a la casilla a la que nos llevaria sigAccion
     */
@@ -363,6 +340,49 @@ public class AgenteSimple extends SuperAgent{
     private boolean comprobarMeta(){
         return gonio.distancia<=1;
     }
+    
+    /**
+    *
+    * @author Monica, Pablo
+    * Comprueba si se puede llegar la meta
+    */
+    private boolean puedeLlegarMeta() {
+        boolean puedeLlegar = true;
+        
+        if(gonio.distancia <= 5){
+            for(int i=0; i<magnetic.length; i++){
+                for(int j=0; j<magnetic.length; j++){
+                    if(magnetic[i][j] == 1){
+                        if( radar[i][j] >= max_z ){
+                            puedeLlegar = false;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return puedeLlegar;
+    }
+    
+    /**
+    *
+    * @author Monica
+    * Comprueba si el agente está dando vueltas en circulo por que no puede llegar
+    * Si pasa mas de 2 veces por el mismo sitio es por que está dando vueltas al no poder llegar a la meta
+    */
+    private boolean daVueltas() {
+        boolean  haPasado= false;
+        
+        for(int i=0; i<memoria.length; i++){
+                for(int j=0; j<memoria.length; j++){
+                    if(memoria [i][j] > 2 ){
+                        haPasado = true;
+                    }
+                }
+            }
+        
+        return haPasado;
+    }
 
 //METODOS DE JSON: Codifican y descodifican los mensajes en formato JSON para facilitar el manejo de los datos recibidos
 
@@ -593,7 +613,9 @@ public class AgenteSimple extends SuperAgent{
                 break; //Hemos acabado
             }
             
-            memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
+            if( !(command == refuel ||  command == moveDW || command == moveUP)  ){
+                memoria[gps.x][gps.y]++; //Almacenamos la posición por la que pasa el agente
+            }
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
