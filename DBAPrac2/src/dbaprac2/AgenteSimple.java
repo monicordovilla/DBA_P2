@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,13 +66,16 @@ public class AgenteSimple extends SuperAgent{
     int min_z;
     int max_z;
     int pasos = 0;
-    int max_pasos = 750;
+    int max_pasos = 3000;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
+    Stack<Accion> mano_dcha; //Pila con las direcciones a las que desea moverse
+    
 
     public AgenteSimple(AgentID aid) throws Exception {
         super(aid);
+        mano_dcha = new Stack<>();
         radar = new int[tamanio_radar][tamanio_radar];
         gonio = new Gonio();
         gps = new GPS();
@@ -126,6 +130,7 @@ public class AgenteSimple extends SuperAgent{
     */
     private boolean puedeMover(Accion sigAccion) {
         int x=5,y=5,z=0;
+        
         switch(sigAccion) {
                 case moveNW: x = 4; y = 4; break; //Comprobación del movimiento NW
                 case moveN: x = 4; y = 5; break;//Comprobación del movimiento N
@@ -138,7 +143,8 @@ public class AgenteSimple extends SuperAgent{
                 case moveDW: z = -5; break;
                 case moveUP: z = 5; break;
               }
-        return(gps.z+z >= radar[x][y] && gps.z+z <= max_z);
+ 
+        return(gps.z+z >= radar[x][y] && radar[x][y] >= min_z && gps.z+z <= max_z);
     }
     
     
@@ -166,8 +172,7 @@ public class AgenteSimple extends SuperAgent{
             case moveSE: x = 6; y = 6; break;//Comprobación del movimiento SE
           }
             
-            
-        if(radar[x][y] > max_z){
+        if(radar[x][y] > max_z || radar[x][y] < min_z){
             sube = false;
         }
         
@@ -176,23 +181,28 @@ public class AgenteSimple extends SuperAgent{
     
     /**
     *
-    * @author Celia, Monica, Kieran
+    * @author Monica, Kieran
     * siguienteAccion() renombrado
     * Copiado-pegado de rodearObstaculoAccion, ya que este simplemente selecciona la mejor opcion sin contar los invalidos.
     * Se ha de tener en cuenta de que rodearObstaculoAccion solo se lanza cuando supere la altura maxima asi que se han tenido que ajustar un par de cosas
+    * Si se pasa false como parametro, solo miria la direccion y no comprueba la validez
     */
-    private Accion siguienteDireccion(){
+    private Accion siguienteDireccion(){ return siguienteDireccion(true); }
+    
+    private Accion siguienteDireccion(boolean comprobar_validez){
         final int dirs = 8;
         final int MAX = 999;
         final float grados_entre_dir = 45;
         
         boolean validos[] = {true,true,true,true,true,true,true,true};
         //System.out.println(accion_anterior.value);
-        for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
-            if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) || estaEnMemoria(Accion.valueOfAccion(i))) validos[i] = false;
-            //if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
+        if(comprobar_validez) {
+            for(int i = 0; i < dirs; i++) { //Eliminamos direcciones imposibles de la lista. Estos incluyen aquellos que ya hemos visitado, y los que no podemos ir a, ni subir para llegar a
+                if((!puedeMover(Accion.valueOfAccion(i)) && !puedeSubir(Accion.valueOfAccion(i))) /*|| estaEnMemoria(Accion.valueOfAccion(i))*/) validos[i] = false;
+                //if(accion_anterior.value < 8 && (accion_anterior.value+4)%8 == i) validos[i] = false;
+            }
+            //System.out.println(Arrays.toString(validos));
         }
-        System.out.println(Arrays.toString(validos));
         float diff_menor = MAX;
         int indice_menor = MAX;
         for(int i = 0; i < 8; i++) {
@@ -203,7 +213,7 @@ public class AgenteSimple extends SuperAgent{
                 indice_menor = i;
                 diff_menor = dist_real;
                 
-                System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
+                //System.out.println("angulo: " + gonio.angulo + "accion escogido: " + Accion.valueOfAccion(i));
                 
             }
         }
@@ -253,7 +263,19 @@ public class AgenteSimple extends SuperAgent{
           return moveDW;
       }
       
-      accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
+            
+      if(!mano_dcha.empty()) { 
+          accion = reglaManoDerecha(); 
+        /*System.out.println(mano_dcha.toString());*/
+      } //REGLA DE MANO DERECHA
+      else
+          accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
+      if(accion_anterior != null && accion_anterior.value < 8 && !puedeMover(accion_anterior)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
+          //System.out.println("mano dcha");
+          mano_dcha.push(siguienteDireccion(false));
+          return reglaManoDerecha();
+      }
+      
       int x=5, y=5;
       
       switch(accion) {
@@ -278,6 +300,41 @@ public class AgenteSimple extends SuperAgent{
       }
 
       return logout;
+    }
+    
+
+    /**
+    *
+    * @author Celia
+    */
+    
+    private Accion reglaManoDerecha(){
+        
+        int enCola = mano_dcha.peek().value; //Obtener valor de la primera accion en cola
+        Accion siguiente;
+        boolean pasado=false;
+//      System.out.println("beep");
+        for(int i=0; i<8; i++){
+  //            System.out.println((8+enCola-i)%8);
+            siguiente = valueOfAccion((8+enCola-i)%8); //+8 para evitar modulos negativos
+            
+    //         System.out.println("beep" + i);
+            if(siguiente.value==accion_anterior.value) 
+                pasado=true;
+                
+            if(puedeMover(siguiente)){
+      //           System.out.println("beep butta return");
+                if(siguiente.value == enCola)
+                    mano_dcha.pop();
+                else if(siguiente.value!=accion_anterior.value && pasado)
+                    mano_dcha.push(accion_anterior);
+                return siguiente;
+            }
+            else if(puedeSubir(siguiente))
+                return moveUP;
+        }
+                
+        return moveDW; //placeholder - borrar ahora
     }
 
     /**
@@ -520,7 +577,7 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar(true);
+            respuesta = escuchar(false);
             JSONDecode(respuesta);
 
             accion_anterior = command;
@@ -535,7 +592,7 @@ public class AgenteSimple extends SuperAgent{
             if(goal || command == logout){
                 break; //Hemos acabado
             }
-            System.out.println(memoria[gps.x][gps.y]);
+            
             memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
