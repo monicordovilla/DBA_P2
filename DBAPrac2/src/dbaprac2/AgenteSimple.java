@@ -373,13 +373,9 @@ public class AgenteSimple extends SuperAgent{
     private boolean daVueltas() {
         boolean  haPasado= false;
         
-        for(int i=0; i<memoria.length; i++){
-                for(int j=0; j<memoria.length; j++){
-                    if(memoria [i][j] > 2 ){
-                        haPasado = true;
-                    }
-                }
-            }
+        if(memoria [gps.x][gps.y] > 2 ){
+            haPasado = true;
+        }
         
         return haPasado;
     }
@@ -599,6 +595,11 @@ public class AgenteSimple extends SuperAgent{
 
             respuesta = escuchar(false);
             JSONDecode(respuesta);
+            
+            if(daVueltas()) {
+                System.out.println("Detectado un bucle con la mano derecha activada. Es probable que el objetivo sea inalcanzable. Terminando ejecución.");
+                break; //salimos
+            }
 
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
