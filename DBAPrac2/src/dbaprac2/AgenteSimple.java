@@ -77,6 +77,8 @@ public class AgenteSimple extends SuperAgent{
         super(aid);
         mano_dcha = new Stack<>();
         radar = new int[tamanio_radar][tamanio_radar];
+        magnetic = new int[tamanio_radar][tamanio_radar];
+        memoria = new int[max_x][max_y]; //Arrays int se inicializan a 0
         gonio = new Gonio();
         gps = new GPS();
         min_x = 0;
@@ -272,9 +274,9 @@ public class AgenteSimple extends SuperAgent{
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //La celda a la que queremos ir esta a una altura superior y podemos llegar a ella
         return moveUP;
-      else if( !puedeLlegarMeta() ){
+      /*else if( metaDemasiadoAlta() ){
           return logout;
-      }
+      }*/
 
       return logout;
     }
@@ -346,15 +348,15 @@ public class AgenteSimple extends SuperAgent{
     * @author Monica, Pablo
     * Comprueba si se puede llegar la meta
     */
-    private boolean puedeLlegarMeta() {
-        boolean puedeLlegar = true;
+    /*private boolean metaDemasiadoAlta() {
+        boolean puedeLlegar = false;
         
         if(gonio.distancia <= 5){
             for(int i=0; i<magnetic.length; i++){
                 for(int j=0; j<magnetic.length; j++){
                     if(magnetic[i][j] == 1){
                         if( radar[i][j] >= max_z ){
-                            puedeLlegar = false;
+                            puedeLlegar = true;
                         }
                     }
                 }
@@ -363,14 +365,14 @@ public class AgenteSimple extends SuperAgent{
         
         return puedeLlegar;
     }
-    
+    */
     /**
     *
     * @author Monica
     * Comprueba si el agente está dando vueltas en circulo por que no puede llegar
     * Si pasa mas de 2 veces por el mismo sitio es por que está dando vueltas al no poder llegar a la meta
     */
-    private boolean daVueltas() {
+    private boolean bucleInfinito() {
         boolean  haPasado= false;
         
         if(memoria [gps.x][gps.y] > 2 ){
@@ -449,7 +451,6 @@ public class AgenteSimple extends SuperAgent{
         min_z = mensaje.get("min").asInt();
         max_z = mensaje.get("max").asInt();
         clave = mensaje.get("key").asString();
-        memoria = new int[max_x][max_y]; //Arrays int se inicializan a 0
     }
     /**
     *
@@ -593,13 +594,13 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar(false);
+            respuesta = escuchar(true);
             JSONDecode(respuesta);
             
-            if(daVueltas()) {
+            /*if(bucleInfinito()) {
                 System.out.println("Detectado un bucle con la mano derecha activada. Es probable que el objetivo sea inalcanzable. Terminando ejecución.");
                 break; //salimos
-            }
+            }*/
 
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
@@ -620,7 +621,7 @@ public class AgenteSimple extends SuperAgent{
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar(false);
+            respuesta = escuchar(true);
             pasos++;
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
