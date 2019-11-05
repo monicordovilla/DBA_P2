@@ -78,7 +78,6 @@ public class AgenteSimple extends SuperAgent{
         mano_dcha = new Stack<>();
         radar = new int[tamanio_radar][tamanio_radar];
         magnetic = new int[tamanio_radar][tamanio_radar];
-        memoria = new int[max_x][max_y]; //Arrays int se inicializan a 0
         gonio = new Gonio();
         gps = new GPS();
         min_x = 0;
@@ -274,9 +273,9 @@ public class AgenteSimple extends SuperAgent{
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //La celda a la que queremos ir esta a una altura superior y podemos llegar a ella
         return moveUP;
-      /*else if( metaDemasiadoAlta() ){
+      else if( metaDemasiadoAlta() ){
           return logout;
-      }*/
+      }
 
       return logout;
     }
@@ -348,24 +347,30 @@ public class AgenteSimple extends SuperAgent{
     * @author Monica, Pablo
     * Comprueba si se puede llegar la meta
     */
-    /*private boolean metaDemasiadoAlta() {
+    private boolean metaDemasiadoAlta() {
         boolean puedeLlegar = false;
         
-        if(gonio.distancia <= 5){
-            for(int i=0; i<magnetic.length; i++){
-                for(int j=0; j<magnetic.length; j++){
-                    if(magnetic[i][j] == 1){
-                        if( radar[i][j] >= max_z ){
-                            puedeLlegar = true;
-                        }
+        if(gonio.distancia > 6) { return true; }
+        boolean metaPosiblementeOculta = false;
+        
+        for(int i=0; i<magnetic.length && !metaPosiblementeOculta; i++){
+            for(int j=0; j<magnetic.length && !metaPosiblementeOculta; j++){
+                if(magnetic[i][j] == 1){
+                    if(i == 0 || j == 0 || i == magnetic.length-1 || j ==magnetic.length-1) {
+                        metaPosiblementeOculta = true;
+                    }
+                    if( radar[i][j] <= max_z ){
+                        puedeLlegar = false;
                     }
                 }
             }
         }
         
+        if(metaPosiblementeOculta) { puedeLlegar = true; }
+        
         return puedeLlegar;
     }
-    */
+    
     /**
     *
     * @author Monica
@@ -451,6 +456,9 @@ public class AgenteSimple extends SuperAgent{
         min_z = mensaje.get("min").asInt();
         max_z = mensaje.get("max").asInt();
         clave = mensaje.get("key").asString();
+        
+        //Se inicializa ahora ya que es cuando recibimos las medidas del mapa
+        memoria = new int[max_x][max_y]; //Arrays int se inicializan a 0
     }
     /**
     *
@@ -597,10 +605,10 @@ public class AgenteSimple extends SuperAgent{
             respuesta = escuchar(true);
             JSONDecode(respuesta);
             
-            /*if(bucleInfinito()) {
+            if(bucleInfinito()) {
                 System.out.println("Detectado un bucle con la mano derecha activada. Es probable que el objetivo sea inalcanzable. Terminando ejecución.");
                 break; //salimos
-            }*/
+            }
 
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
