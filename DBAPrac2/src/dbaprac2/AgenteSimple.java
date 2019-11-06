@@ -551,7 +551,7 @@ public class AgenteSimple extends SuperAgent{
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
-            System.out.println(command.toString());
+            //System.out.println(command.toString());
 
             if(pasos > max_pasos) {
                 command = logout;
