@@ -65,7 +65,7 @@ public class AgenteSimple extends SuperAgent{
     int min_z;
     int max_z;
     int pasos = 0;
-    int max_pasos = 3000;
+    int max_pasos = 1500;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
@@ -247,7 +247,7 @@ public class AgenteSimple extends SuperAgent{
       } //REGLA DE MANO DERECHA
       else
           accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
-      if(accion_anterior != null && accion_anterior.value < 8 && !puedeMover(accion_anterior)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
+      if(accion_anterior != null && accion_anterior.value < 8 && (!puedeMover(accion_anterior) || (accion_anterior.value+4)%8 == accion.value)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
           //System.out.println("mano dcha");
           mano_dcha.push(siguienteDireccion(false));
           return reglaManoDerecha();
@@ -551,7 +551,7 @@ public class AgenteSimple extends SuperAgent{
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
-            //System.out.println(command.toString());
+            System.out.println(command.toString());
 
             if(pasos > max_pasos) {
                 command = logout;
