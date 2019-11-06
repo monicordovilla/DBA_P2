@@ -46,6 +46,7 @@ public class AgenteSimple extends SuperAgent{
     Gonio gonio;
     float fuel;
     int[][] radar;
+    int[][] magnetic;
     boolean goal;
     String status;
     Accion command; //Siguiente accion que tiene que hacer el agente
@@ -65,7 +66,9 @@ public class AgenteSimple extends SuperAgent{
     int min_z;
     int max_z;
     int pasos = 0;
-    int max_pasos = 1500;
+    int pasos_repetidos = 0;
+    int max_pasos = 3000;
+    int max_pasos_repetidos = 10;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     double consumo_fuel; //Consumo de fuel por movimiento
@@ -76,6 +79,7 @@ public class AgenteSimple extends SuperAgent{
         super(aid);
         mano_dcha = new Stack<>();
         radar = new int[tamanio_radar][tamanio_radar];
+        magnetic = new int[tamanio_radar][tamanio_radar];
         gonio = new Gonio();
         gps = new GPS();
         min_x = 0;
@@ -98,7 +102,6 @@ public class AgenteSimple extends SuperAgent{
     }
 
 //METODOS DE EVALUACIÓN: La funcionalidad inteligente del agente, para decidir que hacer
-
     
     /**
     *
@@ -222,7 +225,7 @@ public class AgenteSimple extends SuperAgent{
       
       if(x < 0 || y < 0 || x > max_x || y > max_y) return true; //Para no salirse de la matriz
 
-      return memoria[x][y] == true;
+      return (memoria[x][y] == true);
     }
 
     /**
@@ -272,6 +275,9 @@ public class AgenteSimple extends SuperAgent{
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //La celda a la que queremos ir esta a una altura superior y podemos llegar a ella
         return moveUP;
+      else if( gameOver_metaDemasiadoAlta() ){
+          return logout;
+      }
 
       return logout;
     }
@@ -337,6 +343,62 @@ public class AgenteSimple extends SuperAgent{
     private boolean comprobarMeta(){
         return gonio.distancia<=1;
     }
+    
+    
+//METODOS DE GAME OVER: Comprueba por que no puede realizar un mapa
+    /**
+    *
+    * @author Monica, Pablo
+    * Comprueba si se puede llegar la meta
+    */
+    private boolean gameOver_metaDemasiadoAlta() {
+        boolean puedeLlegar = false;
+        
+        if(gonio.distancia > 6) { return true; }
+        boolean metaPosiblementeOculta = false;
+        
+        for(int i=0; i<magnetic.length && !metaPosiblementeOculta; i++){
+            for(int j=0; j<magnetic.length && !metaPosiblementeOculta; j++){
+                if(magnetic[i][j] == 1){
+                    if(i == 0 || j == 0 || i == magnetic.length-1 || j ==magnetic.length-1) {
+                        metaPosiblementeOculta = true;
+                    }
+                    if( radar[i][j] <= max_z ){
+                        puedeLlegar = false;
+                    }
+                }
+            }
+        }
+        
+        if(metaPosiblementeOculta) { puedeLlegar = true; }
+        
+        return puedeLlegar;
+    }
+    
+    /**
+    *
+    * @author Monica
+    * Comprueba si el agente está dando vueltas en circulo por que no puede llegar
+    * Si repite demasiadas veces los movimientos es que esta en bucle
+    */
+    private boolean gameOver_bucleInfinito() {
+        boolean  haPasado= false;
+        
+        if(memoria[gps.x][gps.y] == true){
+            if( !(command == refuel ||  command == moveDW || command == moveUP)  ){
+                pasos_repetidos++;
+            }
+        }
+        else{
+            pasos_repetidos = 0;
+        }
+        
+        if(pasos_repetidos >= max_pasos_repetidos){
+            haPasado = true;
+        }
+        
+        return haPasado;
+    }
 
 //METODOS DE JSON: Codifican y descodifican los mensajes en formato JSON para facilitar el manejo de los datos recibidos
 
@@ -385,7 +447,13 @@ public class AgenteSimple extends SuperAgent{
                 radar[i][j] = vector_radar.get(j+i*radar.length).asInt();
             }
         }
-
+                
+        JsonArray vector_magnetic = a.get("magnetic").asArray();
+        for(int i=0; i<magnetic.length; i++){
+            for(int j=0; j<magnetic.length; j++){
+                magnetic[i][j] = vector_magnetic.get(j+i*magnetic.length).asInt();
+            }
+        }
 
         goal = a.get("goal").asBoolean();
         status = a.get("status").toString();
@@ -401,7 +469,9 @@ public class AgenteSimple extends SuperAgent{
         min_z = mensaje.get("min").asInt();
         max_z = mensaje.get("max").asInt();
         clave = mensaje.get("key").asString();
-        memoria = new boolean[max_x][max_y]; //Arrays booleanos se inicializan a falso
+        
+        //Se inicializa ahora ya que es cuando recibimos las medidas del mapa
+        memoria = new boolean[max_x][max_y]; //Arrays int se inicializan a 0
     }
     /**
     *
@@ -545,9 +615,9 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar(false);
+            respuesta = escuchar(true);
             JSONDecode(respuesta);
-
+            
             accion_anterior = command;
             command = comprobarAccion(); //funcion de utilidad/comprobar mejor casilla aqui
 
@@ -561,11 +631,18 @@ public class AgenteSimple extends SuperAgent{
                 break; //Hemos acabado
             }
             
-            memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
+            if(gameOver_bucleInfinito()) {
+                System.out.println("Detectado un bucle con la mano derecha activada. Es probable que el objetivo sea inalcanzable. Terminando ejecución.");
+                break; //salimos
+            }
+            
+            if( !(command == refuel ||  command == moveDW || command == moveUP)  ){
+                memoria[gps.x][gps.y] = true; //Almacenamos la posición por la que pasa el agente
+            }
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar(false);
+            respuesta = escuchar(true);
             pasos++;
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
