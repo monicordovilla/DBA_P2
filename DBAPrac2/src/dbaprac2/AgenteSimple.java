@@ -385,7 +385,9 @@ public class AgenteSimple extends SuperAgent{
         boolean  haPasado= false;
         
         if(memoria[gps.x][gps.y] == true){
-            pasos_repetidos++;
+            if( !(command == refuel ||  command == moveDW || command == moveUP)  ){
+                pasos_repetidos++;
+            }
         }
         else{
             pasos_repetidos = 0;
