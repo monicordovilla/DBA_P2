@@ -161,7 +161,7 @@ public class AgenteSimple extends SuperAgent{
     
     /**
     *
-    * @author Monica, Kieran
+    * @author Celia, Monica, Kieran
     * siguienteAccion() renombrado
     * Copiado-pegado de rodearObstaculoAccion, ya que este simplemente selecciona la mejor opcion sin contar los invalidos.
     * Se ha de tener en cuenta de que rodearObstaculoAccion solo se lanza cuando supere la altura maxima asi que se han tenido que ajustar un par de cosas
@@ -243,7 +243,10 @@ public class AgenteSimple extends SuperAgent{
           return moveDW;
       }
       
-            
+      if( gameOver_metaDemasiadoAlta() ){
+          return logout;
+      }
+      
       if(!mano_dcha.empty()) { 
           accion = reglaManoDerecha(); 
         /*System.out.println(mano_dcha.toString());*/
@@ -275,9 +278,6 @@ public class AgenteSimple extends SuperAgent{
         return accion;
       else if(radar[x][y] > gps.z && (gps.z+5 <= max_z) && puedeSubir(accion)) //La celda a la que queremos ir esta a una altura superior y podemos llegar a ella
         return moveUP;
-      else if( gameOver_metaDemasiadoAlta() ){
-          return logout;
-      }
 
       return logout;
     }
@@ -285,7 +285,7 @@ public class AgenteSimple extends SuperAgent{
 
     /**
     *
-    * @author Celia
+    * @author Celia, Kieran
     */
     
     private Accion reglaManoDerecha(){
@@ -341,7 +341,7 @@ public class AgenteSimple extends SuperAgent{
     * @author Celia, Kieran
     */
     private boolean comprobarMeta(){
-        return gonio.distancia<=1;
+        return (magnetic[5][5] == 1);
     }
     
     
@@ -354,7 +354,7 @@ public class AgenteSimple extends SuperAgent{
     private boolean gameOver_metaDemasiadoAlta() {
         boolean puedeLlegar = false;
         
-        if(gonio.distancia > 6) { return true; }
+        if(gonio.distancia > 6) { return false; }
         boolean metaPosiblementeOculta = false;
         
         for(int i=0; i<magnetic.length && !metaPosiblementeOculta; i++){
@@ -372,7 +372,7 @@ public class AgenteSimple extends SuperAgent{
         
         if(metaPosiblementeOculta) { puedeLlegar = true; }
         
-        return puedeLlegar;
+        return (!puedeLlegar);
     }
     
     /**
