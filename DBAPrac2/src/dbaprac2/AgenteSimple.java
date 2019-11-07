@@ -258,7 +258,7 @@ public class AgenteSimple extends SuperAgent{
       } //REGLA DE MANO DERECHA
       else
           accion = siguienteDireccion(); //Escogemos la direccion en la que queremos ir
-      if(accion_anterior != null && accion_anterior.value < 8 && (!puedeMover(accion_anterior) || (accion_anterior.value+4)%8 == accion.value)) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
+      if(accion_anterior != null && accion_anterior.value < 8 && (accion_anterior.value+4)%8 == accion.value) { //Si estamos atrapado en un bucle, ACTIVAMOS MANO DERECHA
           //System.out.println("mano dcha");
           mano_dcha.push(siguienteDireccion(false));
           return reglaManoDerecha();
