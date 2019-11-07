@@ -71,6 +71,7 @@ public class AgenteSimple extends SuperAgent{
     int max_pasos_repetidos = 10;
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
+    boolean repostando; //Actualmente esta bajando para repostar
     double consumo_fuel; //Consumo de fuel por movimiento
     Stack<Accion> mano_dcha; //Pila con las direcciones a las que desea moverse
     
@@ -88,6 +89,7 @@ public class AgenteSimple extends SuperAgent{
         max_z = 255;
         unidades_updown = 5;
         consumo_fuel = 0.5;
+        repostando = false;
     }
 
     /**
@@ -236,8 +238,11 @@ public class AgenteSimple extends SuperAgent{
     private Accion comprobarAccion(){
       Accion accion;
               
-      if(necesitaRepostar() || comprobarMeta()) { // Se comprueba si se necesita repostar o se ha llegado a la meta
+      if(repostando || necesitaRepostar() || comprobarMeta()) { // Se comprueba si se necesita repostar o se ha llegado a la meta
+          if(necesitaRepostar()) { repostando = true; }
+          //System.out.println("repost.");
           if(gps.z == radar[5][5]){
+            repostando = false;
             return ((comprobarMeta())?logout:refuel);
           }
           return moveDW;
@@ -325,6 +330,7 @@ public class AgenteSimple extends SuperAgent{
     private int unidadesBajada(){
       int movs;
       movs = gps.z - radar[5][5]; //Cada bajada conlleva 5 unidades. Calculamos en funcion de la altura cuantos movimientos necesitamos para llegar al suelo
+      //if(repostando) System.out.println(movs/5);
       return movs;
     }
 
@@ -615,7 +621,7 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar(true);
+            respuesta = escuchar(false);
             JSONDecode(respuesta);
             
             accion_anterior = command;
@@ -642,7 +648,7 @@ public class AgenteSimple extends SuperAgent{
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar(true);
+            respuesta = escuchar(false);
             pasos++;
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
