@@ -249,6 +249,7 @@ public class AgenteSimple extends SuperAgent{
       }
       
       if( gameOver_metaDemasiadoAlta() ){
+          System.out.println("Detectado la meta a mayor altura de la posible. Es probable que el objetivo sea inalcanzable. Terminando ejecución.");
           return logout;
       }
       
@@ -339,7 +340,7 @@ public class AgenteSimple extends SuperAgent{
     * @author Kieran, Ana
     */
     private boolean necesitaRepostar(){ //Mira si hace falta repostar el agente, 5 uds de altura gasta 0.5 uds de fuel, 1u altura = 0.1u fuel
-       return (fuel <= (unidadesBajada() * consumo_fuel) + 2*consumo_fuel*unidades_updown); //En la altura a la que estamos el fuel necesario para llegar al suelo sin problema.
+       return (fuel <= (unidadesBajada()/unidades_updown * consumo_fuel) + 2*consumo_fuel); //En la altura a la que estamos el fuel necesario para llegar al suelo sin problema.
     }
 
     /**
@@ -358,7 +359,7 @@ public class AgenteSimple extends SuperAgent{
     * Comprueba si se puede llegar la meta
     */
     private boolean gameOver_metaDemasiadoAlta() {
-        boolean puedeLlegar = false;
+        boolean puedeLlegar = true;
         
         if(gonio.distancia > 6) { return false; }
         boolean metaPosiblementeOculta = false;
@@ -369,7 +370,7 @@ public class AgenteSimple extends SuperAgent{
                     if(i == 0 || j == 0 || i == magnetic.length-1 || j ==magnetic.length-1) {
                         metaPosiblementeOculta = true;
                     }
-                    if( radar[i][j] <= max_z ){
+                    if( radar[i][j] > max_z ){
                         puedeLlegar = false;
                     }
                 }
@@ -621,7 +622,7 @@ public class AgenteSimple extends SuperAgent{
         while(validarRespuesta(respuesta))
         {
 
-            respuesta = escuchar(false);
+            respuesta = escuchar(true);
             JSONDecode(respuesta);
             
             accion_anterior = command;
@@ -648,7 +649,7 @@ public class AgenteSimple extends SuperAgent{
 
             mensaje = JSONEncode(); //codificar respuesta JSON aqui
             comunicar("Izar", mensaje);
-            respuesta = escuchar(false);
+            respuesta = escuchar(true);
             pasos++;
         }
         if(!validarRespuesta(respuesta)) { //si se sale por un resultado invalido devuelve las percepciones antes de la traza
