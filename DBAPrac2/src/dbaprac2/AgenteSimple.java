@@ -65,10 +65,11 @@ public class AgenteSimple extends SuperAgent{
     //altura mínima y máxima a las que el drone puede volar, se asigna valor en el JSONDecode_Inicial
     int min_z;
     int max_z;
-    int pasos = 0;
-    int pasos_repetidos = 0;
-    int max_pasos = 3000;
-    int max_pasos_repetidos = 10;
+    
+    int pasos = 0; //pasos que ha ejecutado el agente
+    int pasos_repetidos = 0; //pasos que ha ejecutado el agente repetidos en memoria
+    int max_pasos = 3000; //maximo de pasos que puede dar el agente
+    int max_pasos_repetidos = 10; //maximo de pasos que puede repetir el agente
 
     int unidades_updown; //Unidades que consume las bajadas y subidas
     boolean repostando; //Actualmente esta bajando para repostar
@@ -95,6 +96,7 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Kieran
+    * Método para seleccionar el mapa que queremos probar desde la terminal
     */
     private String seleccionarMapa(){
         System.out.println("Inserte el nombre del mapa a probar:");
@@ -137,7 +139,6 @@ public class AgenteSimple extends SuperAgent{
     */
     private boolean puedeSubir(Accion sigAccion){
         boolean sube = true;
-        //max_z = 180; //BORRAR DESPUES
         int x = 5;
         int y = 5;
         //System.out.println("Esto sale en pantalla\n");
@@ -338,14 +339,16 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Kieran, Ana
+    * Mira si hace falta repostar el agente, 5 uds de altura gasta 0.5 uds de fuel, 1u altura = 0.1u fuel
     */
-    private boolean necesitaRepostar(){ //Mira si hace falta repostar el agente, 5 uds de altura gasta 0.5 uds de fuel, 1u altura = 0.1u fuel
+    private boolean necesitaRepostar(){
        return (fuel <= (unidadesBajada()/unidades_updown * consumo_fuel) + 2*consumo_fuel); //En la altura a la que estamos el fuel necesario para llegar al suelo sin problema.
     }
 
     /**
     *
     * @author Celia, Kieran
+    * Comprueba si nos encontramos ante una meta
     */
     private boolean comprobarMeta(){
         return (magnetic[5][5] == 1);
@@ -355,7 +358,7 @@ public class AgenteSimple extends SuperAgent{
 //METODOS DE GAME OVER: Comprueba por que no puede realizar un mapa
     /**
     *
-    * @author Monica, Pablo
+    * @author Monica, Pablo, Kieran
     * Comprueba si se puede llegar la meta
     */
     private boolean gameOver_metaDemasiadoAlta() {
@@ -391,16 +394,16 @@ public class AgenteSimple extends SuperAgent{
     private boolean gameOver_bucleInfinito() {
         boolean  haPasado= false;
         
-        if(memoria[gps.x][gps.y] == true){
-            if( !(command == refuel ||  command == moveDW || command == moveUP)  ){
+        if(memoria[gps.x][gps.y] == true){ //Si vuelve a pisar donde ya ha pisado antes
+            if( !(command == refuel ||  command == moveDW || command == moveUP)  ){ //Si es un movimientos que no sea repostar, subir o bajar
                 pasos_repetidos++;
             }
         }
-        else{
+        else{ //si no está repitiendo el contador vuelve a 0 porque no está en un bucle
             pasos_repetidos = 0;
         }
         
-        if(pasos_repetidos >= max_pasos_repetidos){
+        if(pasos_repetidos >= max_pasos_repetidos){ //Si ha superado el número máximo de pasos que puede repetir
             haPasado = true;
         }
         
@@ -430,8 +433,9 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Monica, Kieran
+    * Decodifidar variables en JSON
     */
-    private void JSONDecode(JsonObject mensaje){//Decodifidar variables en JSON
+    private void JSONDecode(JsonObject mensaje){
         //Obtiene la informacion de GPS, fuel, gonio, radar, goal y status
         JsonObject a;
         a = mensaje.get("perceptions").asObject();
@@ -469,8 +473,9 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Kieran
+    * Decodifica el primer mensaje con atributos del mapa
     */
-    private void JSONDecode_Inicial(JsonObject mensaje){//Decodifica el primer mensaje con atributos del mapa
+    private void JSONDecode_Inicial(JsonObject mensaje){
         max_x = mensaje.get("dimx").asInt();
         max_y = mensaje.get("dimy").asInt();
         min_z = mensaje.get("min").asInt();
