@@ -433,7 +433,7 @@ public class AgenteSimple extends SuperAgent{
     /**
     *
     * @author Monica, Kieran
-    * Decodifidar variables en JSON
+    * Decodifidar variables del mensaje dado en JSON
     */
     private void JSONDecode(JsonObject mensaje){
         //Obtiene la informacion de GPS, fuel, gonio, radar, goal y status
